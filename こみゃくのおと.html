@@ -1,0 +1,665 @@
+```html
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>こみゃくのおと 2.0.0</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --expo-red: #E60012;
+            --expo-blue: #0068B7;
+            --expo-gray: #D2D7DA;
+            --expo-white: #FFFFFF;
+        }
+        body, html {
+            margin: 0; padding: 0; overflow: hidden;
+            background-color: var(--expo-white);
+            user-select: none; touch-action: none;
+            font-family: "Helvetica Now Text Medium", "Helvetica Now Text", "Helvetica", Arial, sans-serif;
+        }
+        canvas { display: block; position: absolute; top: 0; left: 0; z-index: 2; pointer-events: none; }
+        
+        #bg-container {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
+            background-color: var(--expo-white);
+            display: flex; justify-content: center; align-items: center;
+        }
+        #bg-image { 
+            position: absolute; width: 100%; height: 100%; object-fit: cover; 
+            display: none;
+        }
+        
+        #interaction-target {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 220px; height: 220px; z-index: 10; cursor: pointer; border-radius: 50%;
+        }
+        #global-move { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; }
+        
+        #tap-guide {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            z-index: 8; pointer-events: none; display: flex; flex-direction: column; align-items: center;
+            transition: opacity 0.5s ease;
+        }
+        .guide-text {
+            margin-top: 240px;
+            font-size: 14px; font-weight: bold; color: var(--expo-blue);
+            letter-spacing: 0.1em; text-transform: uppercase;
+            animation: breathe-text 2s infinite ease-in-out;
+        }
+        .disclaimer-mini {
+            position: fixed; bottom: 15px;
+            left: 0; width: 100%; text-align: center;
+            font-size: 10px; color: var(--expo-gray); letter-spacing: 0.15em;
+            pointer-events: none; font-weight: bold;
+            white-space: nowrap;
+        }
+
+        @keyframes breathe-text {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        .side-ui {
+            position: absolute; top: 24px; right: 24px; z-index: 20;
+        }
+        .ui-btn {
+            width: 50px; height: 50px; background: rgba(255,255,255,0.9);
+            border-radius: 12px; display: flex; justify-content: center; align-items: center;
+            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color: var(--expo-blue);
+            border: none; outline: none; transition: background 0.2s;
+            padding: 0; position: relative;
+        }
+        .ui-btn:active { background: #f0f0f0; }
+        
+        .gear-container {
+            position: relative;
+            width: 32px; height: 32px;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .gear-icon {
+            width: 100%; height: 100%;
+            fill: var(--expo-blue);
+            stroke: none;
+        }
+        .gear-eye-white {
+            position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 10px; height: 10px; background: var(--expo-white);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        .gear-pupil {
+            position: absolute;
+            top: 40%; left: 60%; transform: translate(-50%, -50%);
+            width: 5px; height: 5px; background: var(--expo-blue);
+            border-radius: 50%;
+        }
+
+        #audio-menu {
+            position: absolute; top: 24px; right: 85px; z-index: 30;
+            background: rgba(255,255,255,0.95); border-radius: 16px; padding: 20px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.15); display: none;
+            width: 240px; backdrop-filter: blur(5px);
+        }
+        #audio-menu.show { display: block; }
+        .menu-item { margin-bottom: 16px; }
+        .menu-item:last-child { margin-bottom: 0; }
+        .menu-label { font-size: 12px; font-weight: bold; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; text-transform: uppercase; letter-spacing: 0.05em; }
+        
+        .part-toggles { display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; }
+        .mute-btn {
+            flex: 1; height: 40px; border-radius: 8px; border: 1px solid #eee;
+            background: white; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .mute-btn i { width: 16px; height: 16px; margin-bottom: 2px; }
+        .mute-btn span { font-size: 9px; font-weight: bold; }
+        .mute-btn.active { background: #fff1f1; border-color: var(--expo-red); color: var(--expo-red); }
+
+        .tempo-controls { display: flex; gap: 8px; margin-top: 8px; }
+        .tempo-btn {
+            flex: 1; height: 32px; border-radius: 6px; border: 1px solid #ddd;
+            background: white; font-size: 11px; font-weight: bold; cursor: pointer;
+            font-family: inherit;
+        }
+        .tempo-btn.active { background: var(--expo-blue); color: white; border-color: var(--expo-blue); }
+
+        .photo-upload-container {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #f8f9fa; border-radius: 8px; padding: 8px 12px;
+            cursor: pointer; border: 1px solid #eee; transition: background 0.2s;
+        }
+        .photo-upload-container:hover { background: #f0f0f0; }
+        .photo-upload-text { font-size: 12px; font-weight: bold; color: var(--expo-blue); }
+
+        .menu-footer {
+            margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;
+            font-size: 10px; color: #888; line-height: 1.6; font-weight: bold;
+        }
+
+        input[type=range] { width: 100%; cursor: pointer; }
+        #file-input { display: none; }
+    </style>
+</head>
+<body>
+
+<div id="bg-container"><img id="bg-image" alt="Background"></div>
+<canvas id="canvas"></canvas>
+<div id="global-move"></div>
+<div id="interaction-target"></div>
+
+<div id="tap-guide">
+    <div class="guide-text">Tap to Play</div>
+    <div class="disclaimer-mini">Co-MYAKU FAN ART</div>
+</div>
+
+<div class="side-ui">
+    <button class="ui-btn" id="audio-menu-trigger">
+        <div class="gear-container">
+            <i data-lucide="settings" class="gear-icon"></i>
+            <div class="gear-eye-white">
+                <div class="gear-pupil"></div>
+            </div>
+        </div>
+    </button>
+</div>
+
+<div id="audio-menu">
+    <div class="menu-item">
+        <div class="menu-label">Background Photo</div>
+        <label class="photo-upload-container" for="file-input">
+            <span class="photo-upload-text">PHOTO SELECT</span>
+            <i data-lucide="camera" style="width: 18px; height: 18px;"></i>
+            <input type="file" id="file-input" accept="image/*">
+        </label>
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+
+    <div class="menu-item">
+        <div class="menu-label">Master Volume <span id="val-master">70%</span></div>
+        <input type="range" id="vol-master" min="0" max="1" step="0.01" value="0.7">
+    </div>
+
+    <div class="menu-item">
+        <div class="menu-label">Tempo</div>
+        <div class="tempo-controls">
+            <button class="tempo-btn active" id="tempo-1">1/1 (120)</button>
+            <button class="tempo-btn" id="tempo-2">1/2 (60)</button>
+        </div>
+    </div>
+    
+    <div class="menu-item" style="margin-top: 15px;">
+        <div class="menu-label">Mute</div>
+        <div class="part-toggles">
+            <div class="mute-btn" id="mute-piano">
+                <i data-lucide="volume-2" id="icon-piano"></i>
+                <span>Piano</span>
+            </div>
+            <div class="mute-btn" id="mute-strings">
+                <i data-lucide="volume-2" id="icon-strings"></i>
+                <span>Strings</span>
+            </div>
+            <div class="mute-btn" id="mute-base">
+                <i data-lucide="volume-2" id="icon-base"></i>
+                <span>Bass</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="menu-footer">
+        Ver 2.0.0 (Completion)<br>
+        このコンテンツは非公式の二次創作物です。
+    </div>
+</div>
+
+<script>
+/**
+ * こみゃくのおと 2.0.0
+ * 最終完成版
+ */
+const CONFIG = {
+    COLORS: { RED: '#E60012', BLUE: '#0068B7', GRAY: '#D2D7DA', WHITE: '#FFFFFF' },
+    KOMYAKU: { 
+        RADIUS: 100,
+        EYE_WHITE_RATIO: 0.45,
+        PUPIL_RATIO: 0.20
+    },
+    AUDIO: { 
+        BASE_TICK: 250, 
+        PRIMES: {
+            BASE: 7,
+            PIANO_1: 11,
+            STRINGS_1: 13,
+            STRINGS_2: 17,
+            PIANO_2: 19
+        }
+    }
+};
+
+let width, height, dpr;
+let entities = [], ripples = [];
+let isMasterPlaying = false;
+let isPressing = false;
+let bodyY = 0, bodyScaleY = 1.0, jumpVelocity = 0, jumpTimer = 0;
+
+const audioState = {
+    masterVol: 0.7,
+    pianoVol: 1.0,
+    stringsVol: 1.0,
+    baseVol: 1.0,
+    pianoMuted: false,
+    stringsMuted: false,
+    baseMuted: false,
+    activityLevel: 1.0,
+    tempoScale: 1.0 
+};
+
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+const bgImage = document.getElementById('bg-image');
+const tapGuide = document.getElementById('tap-guide');
+
+class SoundEngine {
+    constructor() {
+        this.ctx = null;
+        this.ready = false;
+        this.steps = 0;
+        this.reverb = null;
+        this.masterGain = null;
+        this.masterCompressor = null;
+        this.tickTimeout = null;
+        this.scales = {
+            strings: [329.63, 369.99, 415.30, 440.00, 493.88, 554.37, 659.25], 
+            base: [82.41, 123.47],
+            piano1: [329.63, 415.30, 493.88, 659.25], 
+            piano2: [164.81, 207.65, 246.94, 293.66, 329.63]
+        };
+        this.analysers = { piano: null, strings: null, base: null };
+    }
+
+    async init() {
+        if (!this.ctx) {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            this.ctx = new AC();
+            this.masterGain = this.ctx.createGain();
+            this.masterGain.gain.setValueAtTime(audioState.masterVol, this.ctx.currentTime);
+            this.masterCompressor = this.ctx.createDynamicsCompressor();
+            this.masterCompressor.threshold.setValueAtTime(-15, this.ctx.currentTime);
+            this.reverb = this.ctx.createConvolver();
+            await this.initReverb();
+            ['piano', 'strings', 'base'].forEach(p => {
+                const node = this.ctx.createAnalyser();
+                node.fftSize = 256;
+                this.analysers[p] = node;
+                node.connect(this.masterGain);
+            });
+            this.masterGain.connect(this.masterCompressor);
+            this.masterCompressor.connect(this.reverb);
+            this.reverb.connect(this.ctx.destination);
+        }
+        if (this.ctx.state === 'suspended') await this.ctx.resume();
+        this.ready = true;
+    }
+
+    async initReverb() {
+        const len = this.ctx.sampleRate * 4.0;
+        const buf = this.ctx.createBuffer(2, len, this.ctx.sampleRate);
+        for (let c = 0; c < 2; c++) {
+            const data = buf.getChannelData(c);
+            for (let i = 0; i < len; i++) {
+                data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+            }
+        }
+        this.reverb.buffer = buf;
+    }
+
+    updateMasterVolume(val) {
+        if (this.masterGain) this.masterGain.gain.setTargetAtTime(val, this.ctx.currentTime, 0.05);
+    }
+
+    triggerPiano(freq, panX, gain, isHigh = false) {
+        if (!this.ready || !this.ctx || audioState.pianoMuted) return;
+        const now = this.ctx.currentTime;
+        const panner = this.ctx.createStereoPanner();
+        panner.pan.setValueAtTime(panX, now);
+        const finalGain = gain * audioState.pianoVol;
+        const pg = this.ctx.createGain();
+        pg.gain.setValueAtTime(0, now);
+        pg.gain.linearRampToValueAtTime(finalGain, now + 0.005);
+        pg.gain.exponentialRampToValueAtTime(0.001, now + (isHigh ? 1.5 : 2.5));
+        const osc1 = this.ctx.createOscillator();
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(freq, now);
+        osc1.connect(pg);
+        const lp = this.ctx.createBiquadFilter();
+        lp.type = 'lowpass';
+        lp.frequency.setValueAtTime(isHigh ? 4000 : 2000, now);
+        osc1.start(now); osc1.stop(now + 2.6);
+        pg.connect(lp); lp.connect(panner); panner.connect(this.analysers.piano);
+    }
+
+    triggerStrings(freq, panX, gain, type = 'high') {
+        if (!this.ready || !this.ctx || audioState.stringsMuted) return;
+        const now = this.ctx.currentTime;
+        const groupGain = this.ctx.createGain();
+        const panner = this.ctx.createStereoPanner();
+        panner.pan.setValueAtTime(panX, now);
+        
+        let formants = type === 'high' ? 
+            [{ f: 800, q: 6, g: 1.2 }, { f: 1200, q: 10, g: 0.8 }, { f: 3000, q: 4, g: 0.4 }] : 
+            [{ f: 500, q: 8, g: 1.2 }, { f: 800, q: 10, g: 0.7 }, { f: 2500, q: 3, g: 0.3 }];
+            
+        const osc = this.ctx.createOscillator();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(freq, now);
+        const finalGain = gain * audioState.stringsVol * 2.5;
+        
+        formants.forEach(fm => {
+            const filter = this.ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(fm.f, now);
+            filter.Q.setValueAtTime(fm.q, now);
+            const fg = this.ctx.createGain();
+            fg.gain.setValueAtTime(fm.g * finalGain, now);
+            osc.connect(filter); filter.connect(fg); fg.connect(groupGain);
+        });
+        
+        const env = this.ctx.createGain();
+        env.gain.setValueAtTime(0, now);
+        env.gain.linearRampToValueAtTime(finalGain, now + 1.2); 
+        env.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
+        osc.start(now); osc.stop(now + 2.5);
+        groupGain.connect(env); env.connect(panner); panner.connect(this.analysers.strings);
+    }
+
+    triggerBlueSound(freq, pan = 0) {
+        if (!this.ready || !this.ctx || audioState.baseMuted) return;
+        const now = this.ctx.currentTime;
+        const gainNode = this.ctx.createGain();
+        const filterNode = this.ctx.createBiquadFilter();
+        const pannerNode = this.ctx.createStereoPanner();
+        filterNode.type = 'lowpass';
+        filterNode.frequency.setValueAtTime(3000, now);
+        [0, 2, -2].forEach((detuneHz, i) => {
+            const osc = this.ctx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq * 2 + detuneHz, now);
+            osc.connect(filterNode);
+            osc.start(now + i * 0.03); osc.stop(now + 12);
+        });
+        const finalGain = 0.3 * audioState.baseVol;
+        gainNode.gain.setValueAtTime(0, now);
+        gainNode.gain.linearRampToValueAtTime(finalGain, now + 0.8);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, now + 10);
+        pannerNode.pan.setValueAtTime(pan, now);
+        filterNode.connect(gainNode); gainNode.connect(pannerNode); pannerNode.connect(this.analysers.base);
+        this.spawnParticle(CONFIG.COLORS.GRAY);
+    }
+
+    triggerInst(part, panX) {
+        if (!this.ready || !this.ctx) return;
+        const freqArr = this.scales[part] || this.scales.strings;
+        const freq = freqArr[Math.floor(Math.random() * freqArr.length)];
+        if (part === 'strings1' || part === 'strings2') {
+            if (audioState.stringsMuted) return;
+            this.triggerStrings(freq, panX, 0.5, part === 'strings1' ? 'high' : 'low');
+            if (Math.random() < audioState.activityLevel) this.spawnParticle(CONFIG.COLORS.BLUE);
+        } else if (part === 'base') {
+            this.triggerBlueSound(freq, panX);
+        } else if (part === 'piano1' || part === 'piano2') {
+            if (audioState.pianoMuted) return;
+            this.triggerPiano(freq, panX, 0.45, part === 'piano1');
+            if (Math.random() < audioState.activityLevel) this.spawnParticle(CONFIG.COLORS.RED);
+        }
+    }
+
+    spawnParticle(colorHex) {
+        const angle = Math.random() * Math.PI * 2;
+        const startX = width/2;
+        const startY = height/2 + bodyY;
+        if (Math.random() < 0.25) {
+            entities.push(new MiniKomyaku(startX, startY, colorHex, angle));
+        } else {
+            entities.push(new Bubble(startX, startY, colorHex, angle));
+        }
+    }
+
+    startLoop() {
+        const tick = () => {
+            if (!isMasterPlaying || !this.ready) return;
+            if (this.steps % CONFIG.AUDIO.PRIMES.BASE === 0) this.triggerInst('base', 0);
+            if (this.steps % CONFIG.AUDIO.PRIMES.PIANO_1 === 0) this.triggerInst('piano1', -0.4);
+            if (this.steps % CONFIG.AUDIO.PRIMES.PIANO_2 === 0) this.triggerInst('piano2', 0.4);
+            if (this.steps % CONFIG.AUDIO.PRIMES.STRINGS_1 === 0) this.triggerInst('strings1', -0.25);
+            if (this.steps % CONFIG.AUDIO.PRIMES.STRINGS_2 === 0) this.triggerInst('strings2', 0.25);
+            this.steps++;
+            this.tickTimeout = setTimeout(tick, CONFIG.AUDIO.BASE_TICK * audioState.tempoScale);
+        };
+        tick();
+    }
+}
+
+class Bubble {
+    constructor(x, y, color, angle) {
+        this.baseX = x; this.baseY = y; this.color = color; this.angle = angle;
+        this.speed = 1.5 + Math.random() * 2.5; this.dist = 0; this.life = 1.0; 
+        this.maxSize = 25 + Math.random() * 25; 
+        this.offsetPhase = Math.random() * Math.PI * 2;
+        this.offsetFreq = 0.05 + Math.random() * 0.05;
+        this.offsetAmp = 10 + Math.random() * 20;
+    }
+    update() { this.dist += this.speed; this.life -= 0.006; return this.life > 0; }
+    draw(ctx) {
+        const tx = Math.cos(this.angle) * this.dist;
+        const ty = Math.sin(this.angle) * this.dist;
+        const wave = Math.sin(this.dist * this.offsetFreq + this.offsetPhase) * this.offsetAmp * (1.0 - this.life);
+        const currentSize = this.maxSize * (1.0 - this.life); 
+        ctx.save(); 
+        ctx.globalAlpha = Math.min(1.0, this.life * 5.0);
+        ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.baseX + tx - Math.sin(this.angle)*wave, this.baseY + ty + Math.cos(this.angle)*wave, currentSize, 0, Math.PI * 2); ctx.fill(); 
+        ctx.restore();
+    }
+}
+
+class MiniKomyaku {
+    constructor(startX, startY, color, angle) {
+        this.baseX = startX; this.baseY = startY; this.color = color; this.angle = angle;
+        this.speed = 1.0 + Math.random() * 1.5; this.dist = 0; this.life = 1.0; 
+        this.maxSize = 35 + Math.random() * 15; 
+        const ewAngle = Math.random() * Math.PI * 2;
+        this.ewXRatio = Math.cos(ewAngle) * 0.3;
+        this.ewYRatio = Math.sin(ewAngle) * 0.3;
+        this.lookX = Math.cos(Math.random() * Math.PI * 2) * 0.5;
+        this.lookY = Math.sin(Math.random() * Math.PI * 2) * 0.5;
+        this.offsetPhase = Math.random() * Math.PI * 2;
+        this.offsetFreq = 0.04 + Math.random() * 0.04;
+        this.offsetAmp = 15 + Math.random() * 15;
+    }
+    update() { this.dist += this.speed; this.life -= 0.005; return this.life > 0.01; }
+    draw(ctx) {
+        const tx = Math.cos(this.angle) * this.dist;
+        const ty = Math.sin(this.angle) * this.dist;
+        const wave = Math.sin(this.dist * this.offsetFreq + this.offsetPhase) * this.offsetAmp * (1.0 - this.life);
+        const currentSize = this.maxSize * (1.0 - this.life); 
+        const ewR = currentSize * CONFIG.KOMYAKU.EYE_WHITE_RATIO;
+        const pR = currentSize * CONFIG.KOMYAKU.PUPIL_RATIO;
+        const ewX = this.ewXRatio * currentSize;
+        const ewY = this.ewYRatio * currentSize;
+        ctx.save(); ctx.translate(this.baseX + tx - Math.sin(this.angle)*wave, this.baseY + ty + Math.cos(this.angle)*wave);
+        ctx.globalAlpha = Math.min(1.0, this.life * 5.0);
+        ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(0, 0, currentSize, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(ewX, ewY, ewR, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = CONFIG.COLORS.BLUE; ctx.beginPath(); ctx.arc(ewX + this.lookX*(ewR*0.5), ewY + this.lookY*(ewR*0.5), pR, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+    }
+}
+
+class KomyakuUI {
+    constructor() {
+        this.r = CONFIG.KOMYAKU.RADIUS;
+        this.whiteEyeR = this.r * CONFIG.KOMYAKU.EYE_WHITE_RATIO;
+        this.pupilR = this.r * CONFIG.KOMYAKU.PUPIL_RATIO;
+        this.eyeX = 0; this.eyeY = 0; this.pupilX = 0; this.pupilY = 0;
+        this.targetEyeX = 0; this.targetEyeY = 0; this.autoTimer = 0;
+    }
+    
+    clampEyePosition(tx, ty) {
+        const maxDist = (this.r - this.whiteEyeR - 8); 
+        const currentDist = Math.sqrt(tx * tx + ty * ty);
+        if (currentDist > maxDist) {
+            const angle = Math.atan2(ty, tx);
+            return {
+                x: Math.cos(angle) * maxDist,
+                y: Math.sin(angle) * maxDist
+            };
+        }
+        return { x: tx, y: ty };
+    }
+
+    update() {
+        if (!isPressing) {
+            if (--this.autoTimer <= 0) {
+                let angle = Math.random() * Math.PI * 2;
+                let dist = (this.r - this.whiteEyeR - 5) * 0.7;
+                this.targetEyeX = Math.cos(angle) * dist; 
+                this.targetEyeY = Math.sin(angle) * dist;
+                this.autoTimer = 150 + Math.random() * 300; 
+            }
+            this.eyeX += (this.targetEyeX - this.eyeX) * 0.02; 
+            this.eyeY += (this.targetEyeY - this.eyeY) * 0.02;
+        }
+        
+        this.pupilX += (this.eyeX * 1.25 - this.pupilX) * 0.12; 
+        this.pupilY += (this.eyeY * 1.25 - this.pupilY) * 0.12;
+        
+        const limit = (this.r - this.whiteEyeR - 5) * 0.7;
+        const normalizedY = (this.eyeY / (limit || 1)); 
+        audioState.activityLevel = Math.max(0.1, 1.0 - ((normalizedY + 1) / 2) * 0.9);
+        
+        if (!isMasterPlaying) {
+            if (bodyY === 0 && jumpVelocity === 0) { 
+                if (--jumpTimer <= 0) { jumpVelocity = -5.5; jumpTimer = 200; } 
+            }
+            if (jumpVelocity !== 0 || bodyY < 0) { 
+                bodyY += jumpVelocity; 
+                jumpVelocity += 0.35; 
+                if (bodyY > 0) { bodyY = 0; jumpVelocity = 0; bodyScaleY = 0.92; } 
+            }
+            bodyScaleY += (1.0 - bodyScaleY) * 0.15;
+        } else { bodyY *= 0.85; bodyScaleY = 1.0; }
+    }
+    draw(ctx) {
+        ctx.save(); ctx.translate(width/2, height/2 + bodyY); ctx.scale(1.0, bodyScaleY);
+        ctx.fillStyle = CONFIG.COLORS.RED; ctx.beginPath(); ctx.arc(0, 0, this.r, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(this.eyeX, this.eyeY, this.whiteEyeR, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = CONFIG.COLORS.BLUE; ctx.beginPath(); ctx.arc(this.pupilX, this.pupilY, this.pupilR, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+    }
+}
+
+const engine = new SoundEngine();
+const uiModel = new KomyakuUI();
+const audioMenu = document.getElementById('audio-menu');
+const audioTrigger = document.getElementById('audio-menu-trigger');
+
+audioTrigger.onclick = (e) => { 
+    e.stopPropagation(); 
+    audioMenu.classList.toggle('show'); 
+};
+
+document.addEventListener('click', (e) => {
+    if (audioMenu.classList.contains('show') && !audioMenu.contains(e.target) && !audioTrigger.contains(e.target)) {
+        audioMenu.classList.remove('show');
+    }
+});
+
+document.getElementById('interaction-target').onclick = async () => {
+    if (isMasterPlaying) { 
+        isMasterPlaying = false; 
+        if (engine.tickTimeout) { clearTimeout(engine.tickTimeout); engine.tickTimeout = null; }
+        tapGuide.style.opacity = "1";
+    }
+    else { 
+        await engine.init(); 
+        isMasterPlaying = true; 
+        engine.startLoop(); 
+        tapGuide.style.opacity = "0";
+    }
+};
+
+document.getElementById('vol-master').oninput = (e) => {
+    const val = parseFloat(e.target.value); audioState.masterVol = val;
+    document.getElementById('val-master').innerText = Math.round(val * 100) + '%'; engine.updateMasterVolume(val);
+};
+
+const setTempo = (scale) => {
+    audioState.tempoScale = scale;
+    document.getElementById('tempo-1').classList.toggle('active', scale === 1.0);
+    document.getElementById('tempo-2').classList.toggle('active', scale === 2.0);
+};
+document.getElementById('tempo-1').onclick = () => setTempo(1.0);
+document.getElementById('tempo-2').onclick = () => setTempo(2.0);
+
+const toggleMute = (part) => {
+    audioState[part + 'Muted'] = !audioState[part + 'Muted'];
+    const btn = document.getElementById('mute-' + part);
+    const icon = document.getElementById('icon-' + part);
+    btn.classList.toggle('active', audioState[part + 'Muted']);
+    icon.setAttribute('data-lucide', audioState[part + 'Muted'] ? 'volume-x' : 'volume-2');
+    lucide.createIcons();
+};
+document.getElementById('mute-piano').onclick = () => toggleMute('piano');
+document.getElementById('mute-strings').onclick = () => toggleMute('strings');
+document.getElementById('mute-base').onclick = () => toggleMute('base');
+
+document.getElementById('file-input').onchange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (ev) => { 
+            bgImage.src = ev.target.result; 
+            bgImage.style.display = 'block'; 
+        };
+        reader.readAsDataURL(file);
+    }
+};
+
+document.getElementById('global-move').onpointerdown = (e) => {
+    isPressing = true;
+    const clamped = uiModel.clampEyePosition((e.clientX - width/2), (e.clientY - height/2));
+    uiModel.targetEyeX = clamped.x; 
+    uiModel.targetEyeY = clamped.y;
+};
+window.onpointermove = (e) => { 
+    if (isPressing) { 
+        const clamped = uiModel.clampEyePosition((e.clientX - width/2), (e.clientY - height/2));
+        uiModel.targetEyeX = clamped.x; 
+        uiModel.targetEyeY = clamped.y; 
+    } 
+};
+window.onpointerup = () => isPressing = false;
+
+function resize() {
+    dpr = window.devicePixelRatio || 1; width = window.innerWidth; height = window.innerHeight;
+    canvas.width = width * dpr; canvas.height = height * dpr;
+    canvas.style.width = width + 'px'; canvas.style.height = height + 'px';
+    ctx.scale(dpr, dpr);
+}
+
+function loop() {
+    ctx.clearRect(0, 0, width, height);
+    entities = entities.filter(e => e.update() ? (e.draw(ctx), true) : false);
+    uiModel.update(); uiModel.draw(ctx);
+    requestAnimationFrame(loop);
+}
+
+window.onresize = resize;
+resize(); loop(); lucide.createIcons();
+</script>
+</body>
+</html>
+
+```
