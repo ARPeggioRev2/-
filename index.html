@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>こみゃくのおと 2.0</title>
+    <title>こみゃくのおと 2.0.1</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
@@ -17,7 +17,9 @@
             margin: 0; padding: 0; overflow: hidden;
             background-color: var(--expo-white);
             user-select: none; touch-action: none;
-            font-family: "Helvetica Now Text Medium", "Helvetica Now Text", "Helvetica", Arial, sans-serif;
+            /* 欧文: Helvetica Now Text Medium / 和文: 遊ゴシック体 Medium */
+            font-family: "Helvetica Now Text Medium", "Helvetica Now Text", "YuGothic", "Yu Gothic", "遊ゴシック体", "遊ゴシック", sans-serif;
+            font-weight: 500;
         }
         canvas { display: block; position: absolute; top: 0; left: 0; z-index: 2; pointer-events: none; }
         
@@ -39,21 +41,28 @@
         
         #tap-guide {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 8; pointer-events: none; display: flex; flex-direction: column; align-items: center;
+            z-index: 8; pointer-events: none; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; width: 100%;
             transition: opacity 0.5s ease;
         }
         .guide-text {
             margin-top: 240px;
-            font-size: 14px; font-weight: bold; color: var(--expo-blue);
+            font-size: 14px; color: var(--expo-blue);
             letter-spacing: 0.1em; text-transform: uppercase;
             animation: breathe-text 2s infinite ease-in-out;
+            text-align: center;
+            /* 視認性向上のためのシャドウを追加 */
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.5);
         }
         .disclaimer-mini {
             position: fixed; bottom: 15px;
             left: 0; width: 100%; text-align: center;
             font-size: 10px; color: var(--expo-gray); letter-spacing: 0.15em;
-            pointer-events: none; font-weight: bold;
+            pointer-events: none;
             white-space: nowrap;
+            /* 下部テキストにも薄くシャドウを適用 */
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
         }
 
         @keyframes breathe-text {
@@ -69,7 +78,6 @@
             border-radius: 12px; display: flex; justify-content: center; align-items: center;
             cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color: var(--expo-blue);
             border: none; outline: none; transition: background 0.2s;
-            padding: 0; position: relative;
         }
         .ui-btn:active { background: #f0f0f0; }
         
@@ -106,23 +114,25 @@
         #audio-menu.show { display: block; }
         .menu-item { margin-bottom: 16px; }
         .menu-item:last-child { margin-bottom: 0; }
-        .menu-label { font-size: 12px; font-weight: bold; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; text-transform: uppercase; letter-spacing: 0.05em; }
+        .menu-label { font-size: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; text-transform: uppercase; letter-spacing: 0.05em; }
         
         .part-toggles { display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; }
         .mute-btn {
             flex: 1; height: 40px; border-radius: 8px; border: 1px solid #eee;
             background: white; display: flex; flex-direction: column; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s;
+            font-family: inherit;
         }
         .mute-btn i { width: 16px; height: 16px; margin-bottom: 2px; }
-        .mute-btn span { font-size: 9px; font-weight: bold; }
+        .mute-btn span { font-size: 9px; }
         .mute-btn.active { background: #fff1f1; border-color: var(--expo-red); color: var(--expo-red); }
 
         .tempo-controls { display: flex; gap: 8px; margin-top: 8px; }
         .tempo-btn {
             flex: 1; height: 32px; border-radius: 6px; border: 1px solid #ddd;
-            background: white; font-size: 11px; font-weight: bold; cursor: pointer;
+            background: white; font-size: 11px; cursor: pointer;
             font-family: inherit;
+            font-weight: 500;
         }
         .tempo-btn.active { background: var(--expo-blue); color: white; border-color: var(--expo-blue); }
 
@@ -132,11 +142,11 @@
             cursor: pointer; border: 1px solid #eee; transition: background 0.2s;
         }
         .photo-upload-container:hover { background: #f0f0f0; }
-        .photo-upload-text { font-size: 12px; font-weight: bold; color: var(--expo-blue); }
+        .photo-upload-text { font-size: 12px; color: var(--expo-blue); }
 
         .menu-footer {
             margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;
-            font-size: 10px; color: #888; line-height: 1.6; font-weight: bold;
+            font-size: 10px; color: #888; line-height: 1.6;
         }
 
         input[type=range] { width: 100%; cursor: pointer; }
@@ -210,19 +220,19 @@
     </div>
 
     <div class="menu-footer">
-        Ver 2.0.0<br>
+        Ver 2.0.1<br>
         このコンテンツは非公式の二次創作物です。
     </div>
 </div>
 
 <script>
 /**
- * こみゃくのおと 2.0.0
- 
+ * こみゃくのおと 2.0.1
+ * 更新内容: タップガイドの中央寄せ修正、視認性向上のためのシャドウ追加
  */
 const CONFIG = {
     COLORS: { RED: '#E60012', BLUE: '#0068B7', GRAY: '#D2D7DA', WHITE: '#FFFFFF' },
-    KOMYAKU: { 
+    CO_MYAKU: { 
         RADIUS: 100,
         EYE_WHITE_RATIO: 0.45,
         PUPIL_RATIO: 0.20
@@ -240,7 +250,7 @@ const CONFIG = {
 };
 
 let width, height, dpr;
-let entities = [], ripples = [];
+let entities = [];
 let isMasterPlaying = false;
 let isPressing = false;
 let bodyY = 0, bodyScaleY = 1.0, jumpVelocity = 0, jumpTimer = 0;
@@ -348,7 +358,7 @@ class SoundEngine {
         const panner = this.ctx.createStereoPanner();
         panner.pan.setValueAtTime(panX, now);
         
-        let formants = type === 'high' ? 
+        const formants = type === 'high' ? 
             [{ f: 800, q: 6, g: 1.2 }, { f: 1200, q: 10, g: 0.8 }, { f: 3000, q: 4, g: 0.4 }] : 
             [{ f: 500, q: 8, g: 1.2 }, { f: 800, q: 10, g: 0.7 }, { f: 2500, q: 3, g: 0.3 }];
             
@@ -375,7 +385,7 @@ class SoundEngine {
         groupGain.connect(env); env.connect(panner); panner.connect(this.analysers.strings);
     }
 
-    triggerBlueSound(freq, pan = 0) {
+    triggerBaseSound(freq, pan = 0) {
         if (!this.ready || !this.ctx || audioState.baseMuted) return;
         const now = this.ctx.currentTime;
         const gainNode = this.ctx.createGain();
@@ -408,7 +418,7 @@ class SoundEngine {
             this.triggerStrings(freq, panX, 0.5, part === 'strings1' ? 'high' : 'low');
             if (Math.random() < audioState.activityLevel) this.spawnParticle(CONFIG.COLORS.BLUE);
         } else if (part === 'base') {
-            this.triggerBlueSound(freq, panX);
+            this.triggerBaseSound(freq, panX);
         } else if (part === 'piano1' || part === 'piano2') {
             if (audioState.pianoMuted) return;
             this.triggerPiano(freq, panX, 0.45, part === 'piano1');
@@ -421,7 +431,7 @@ class SoundEngine {
         const startX = width/2;
         const startY = height/2 + bodyY;
         if (Math.random() < 0.25) {
-            entities.push(new MiniKomyaku(startX, startY, colorHex, angle));
+            entities.push(new MiniCoMyaku(startX, startY, colorHex, angle));
         } else {
             entities.push(new Bubble(startX, startY, colorHex, angle));
         }
@@ -464,7 +474,7 @@ class Bubble {
     }
 }
 
-class MiniKomyaku {
+class MiniCoMyaku {
     constructor(startX, startY, color, angle) {
         this.baseX = startX; this.baseY = startY; this.color = color; this.angle = angle;
         this.speed = 1.0 + Math.random() * 1.5; this.dist = 0; this.life = 1.0; 
@@ -484,8 +494,8 @@ class MiniKomyaku {
         const ty = Math.sin(this.angle) * this.dist;
         const wave = Math.sin(this.dist * this.offsetFreq + this.offsetPhase) * this.offsetAmp * (1.0 - this.life);
         const currentSize = this.maxSize * (1.0 - this.life); 
-        const ewR = currentSize * CONFIG.KOMYAKU.EYE_WHITE_RATIO;
-        const pR = currentSize * CONFIG.KOMYAKU.PUPIL_RATIO;
+        const ewR = currentSize * CONFIG.CO_MYAKU.EYE_WHITE_RATIO;
+        const pR = currentSize * CONFIG.CO_MYAKU.PUPIL_RATIO;
         const ewX = this.ewXRatio * currentSize;
         const ewY = this.ewYRatio * currentSize;
         ctx.save(); ctx.translate(this.baseX + tx - Math.sin(this.angle)*wave, this.baseY + ty + Math.cos(this.angle)*wave);
@@ -497,11 +507,11 @@ class MiniKomyaku {
     }
 }
 
-class KomyakuUI {
+class MainCoMyaku {
     constructor() {
-        this.r = CONFIG.KOMYAKU.RADIUS;
-        this.whiteEyeR = this.r * CONFIG.KOMYAKU.EYE_WHITE_RATIO;
-        this.pupilR = this.r * CONFIG.KOMYAKU.PUPIL_RATIO;
+        this.r = CONFIG.CO_MYAKU.RADIUS;
+        this.whiteEyeR = this.r * CONFIG.CO_MYAKU.EYE_WHITE_RATIO;
+        this.pupilR = this.r * CONFIG.CO_MYAKU.PUPIL_RATIO;
         this.eyeX = 0; this.eyeY = 0; this.pupilX = 0; this.pupilY = 0;
         this.targetEyeX = 0; this.targetEyeY = 0; this.autoTimer = 0;
     }
@@ -561,22 +571,23 @@ class KomyakuUI {
 }
 
 const engine = new SoundEngine();
-const uiModel = new KomyakuUI();
+const uiModel = new MainCoMyaku();
 const audioMenu = document.getElementById('audio-menu');
 const audioTrigger = document.getElementById('audio-menu-trigger');
 
 audioTrigger.onclick = (e) => { 
-    e.stopPropagation(); 
+    e.stopPropagation();
     audioMenu.classList.toggle('show'); 
 };
 
-document.addEventListener('click', (e) => {
-    if (audioMenu.classList.contains('show') && !audioMenu.contains(e.target) && !audioTrigger.contains(e.target)) {
-        audioMenu.classList.remove('show');
-    }
+audioMenu.onclick = (e) => e.stopPropagation();
+
+document.addEventListener('click', () => {
+    if (audioMenu.classList.contains('show')) audioMenu.classList.remove('show');
 });
 
-document.getElementById('interaction-target').onclick = async () => {
+document.getElementById('interaction-target').onclick = async (e) => {
+    e.stopPropagation();
     if (isMasterPlaying) { 
         isMasterPlaying = false; 
         if (engine.tickTimeout) { clearTimeout(engine.tickTimeout); engine.tickTimeout = null; }
@@ -591,19 +602,23 @@ document.getElementById('interaction-target').onclick = async () => {
 };
 
 document.getElementById('vol-master').oninput = (e) => {
-    const val = parseFloat(e.target.value); audioState.masterVol = val;
-    document.getElementById('val-master').innerText = Math.round(val * 100) + '%'; engine.updateMasterVolume(val);
+    const val = parseFloat(e.target.value); 
+    audioState.masterVol = val;
+    document.getElementById('val-master').innerText = Math.round(val * 100) + '%'; 
+    engine.updateMasterVolume(val);
 };
 
-const setTempo = (scale) => {
+const setTempo = (scale, e) => {
+    if (e) e.stopPropagation();
     audioState.tempoScale = scale;
     document.getElementById('tempo-1').classList.toggle('active', scale === 1.0);
     document.getElementById('tempo-2').classList.toggle('active', scale === 2.0);
 };
-document.getElementById('tempo-1').onclick = () => setTempo(1.0);
-document.getElementById('tempo-2').onclick = () => setTempo(2.0);
+document.getElementById('tempo-1').onclick = (e) => setTempo(1.0, e);
+document.getElementById('tempo-2').onclick = (e) => setTempo(2.0, e);
 
-const toggleMute = (part) => {
+const toggleMute = (part, e) => {
+    if (e) e.stopPropagation();
     audioState[part + 'Muted'] = !audioState[part + 'Muted'];
     const btn = document.getElementById('mute-' + part);
     const icon = document.getElementById('icon-' + part);
@@ -611,9 +626,9 @@ const toggleMute = (part) => {
     icon.setAttribute('data-lucide', audioState[part + 'Muted'] ? 'volume-x' : 'volume-2');
     lucide.createIcons();
 };
-document.getElementById('mute-piano').onclick = () => toggleMute('piano');
-document.getElementById('mute-strings').onclick = () => toggleMute('strings');
-document.getElementById('mute-base').onclick = () => toggleMute('base');
+document.getElementById('mute-piano').onclick = (e) => toggleMute('piano', e);
+document.getElementById('mute-strings').onclick = (e) => toggleMute('strings', e);
+document.getElementById('mute-base').onclick = (e) => toggleMute('base', e);
 
 document.getElementById('file-input').onchange = (e) => {
     const file = e.target.files[0];
@@ -630,20 +645,19 @@ document.getElementById('file-input').onchange = (e) => {
 document.getElementById('global-move').onpointerdown = (e) => {
     isPressing = true;
     const clamped = uiModel.clampEyePosition((e.clientX - width/2), (e.clientY - height/2));
-    uiModel.targetEyeX = clamped.x; 
-    uiModel.targetEyeY = clamped.y;
+    uiModel.targetEyeX = clamped.x; uiModel.targetEyeY = clamped.y;
 };
 window.onpointermove = (e) => { 
     if (isPressing) { 
         const clamped = uiModel.clampEyePosition((e.clientX - width/2), (e.clientY - height/2));
-        uiModel.targetEyeX = clamped.x; 
-        uiModel.targetEyeY = clamped.y; 
+        uiModel.targetEyeX = clamped.x; uiModel.targetEyeY = clamped.y; 
     } 
 };
 window.onpointerup = () => isPressing = false;
 
 function resize() {
-    dpr = window.devicePixelRatio || 1; width = window.innerWidth; height = window.innerHeight;
+    dpr = window.devicePixelRatio || 1; 
+    width = window.innerWidth; height = window.innerHeight;
     canvas.width = width * dpr; canvas.height = height * dpr;
     canvas.style.width = width + 'px'; canvas.style.height = height + 'px';
     ctx.scale(dpr, dpr);
@@ -661,5 +675,3 @@ resize(); loop(); lucide.createIcons();
 </script>
 </body>
 </html>
-
-```
