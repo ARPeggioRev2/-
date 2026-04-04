@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>こみゃくのおと 2.0.2</title>
+    <title>こみゃくのおと 2.0.4</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
@@ -12,10 +11,12 @@
             --expo-blue: #0068B7;
             --expo-gray: #D2D7DA;
             --expo-white: #FFFFFF;
+            --expo-dark-gray: #222426;
         }
         body, html {
             margin: 0; padding: 0; overflow: hidden;
             background-color: var(--expo-white);
+            color: var(--expo-dark-gray);
             user-select: none; touch-action: none;
             font-family: "Helvetica Now Text Medium", "Helvetica Now Text", "YuGothic", "Yu Gothic", "遊ゴシック体", "遊ゴシック", sans-serif;
             font-weight: 500;
@@ -26,6 +27,7 @@
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
             background-color: var(--expo-white);
             display: flex; justify-content: center; align-items: center;
+            transition: background-color 0.3s ease;
         }
         #bg-image { 
             position: absolute; width: 100%; height: 100%; object-fit: cover; 
@@ -53,7 +55,6 @@
             text-align: center;
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.5);
         }
-        /* ランドスケープモード（横画面）でのテキスト位置調整 */
         @media (orientation: landscape) and (max-height: 500px) {
             .guide-text { margin-top: 180px; font-size: 12px; }
         }
@@ -112,22 +113,45 @@
             background: rgba(255,255,255,0.95); border-radius: 16px; padding: 20px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.15); display: none;
             width: 240px; backdrop-filter: blur(5px);
-            /* 横画面対応：最大高さを設定しスクロール可能に */
             max-height: calc(100vh - 80px);
             overflow-y: auto;
             -webkit-overflow-scrolling: touch;
+            color: var(--expo-dark-gray);
         }
         #audio-menu.show { display: block; }
         .menu-item { margin-bottom: 16px; }
         .menu-item:last-child { margin-bottom: 0; }
-        .menu-label { font-size: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; text-transform: uppercase; letter-spacing: 0.05em; }
         
+        /* 見出し文字をBoldに変更 */
+        .menu-label { 
+            font-size: 12px; margin-bottom: 8px; display: flex; 
+            justify-content: space-between; align-items: center; 
+            text-transform: uppercase; letter-spacing: 0.05em;
+            color: var(--expo-dark-gray);
+            font-weight: bold; 
+        }
+        
+        .reset-bg-btn {
+            display: flex; align-items: center; gap: 8px;
+            width: 100%; padding: 8px 12px; margin-bottom: 10px;
+            background: white; border: 1px solid #eee; border-radius: 8px;
+            cursor: pointer; transition: background 0.2s;
+            font-size: 11px; color: var(--expo-dark-gray);
+            font-family: inherit; font-weight: 500;
+        }
+        .reset-bg-btn:hover { background: #f9f9f9; }
+        .bg-dot {
+            width: 16px; height: 16px; border-radius: 50%; border: 1px solid #ddd;
+            background: #FFFFFF;
+        }
+
         .part-toggles { display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; }
         .mute-btn {
             flex: 1; height: 40px; border-radius: 8px; border: 1px solid #eee;
             background: white; display: flex; flex-direction: column; align-items: center; justify-content: center;
             cursor: pointer; transition: all 0.2s;
             font-family: inherit;
+            color: var(--expo-dark-gray);
         }
         .mute-btn i { width: 16px; height: 16px; margin-bottom: 2px; }
         .mute-btn span { font-size: 9px; }
@@ -137,8 +161,8 @@
         .tempo-btn {
             flex: 1; height: 32px; border-radius: 6px; border: 1px solid #ddd;
             background: white; font-size: 11px; cursor: pointer;
-            font-family: inherit;
-            font-weight: 500;
+            font-family: inherit; font-weight: 500;
+            color: var(--expo-dark-gray);
         }
         .tempo-btn.active { background: var(--expo-blue); color: white; border-color: var(--expo-blue); }
 
@@ -146,16 +170,20 @@
             display: flex; align-items: center; justify-content: space-between;
             background: #f8f9fa; border-radius: 8px; padding: 8px 12px;
             cursor: pointer; border: 1px solid #eee; transition: background 0.2s;
+            color: var(--expo-blue);
         }
         .photo-upload-container:hover { background: #f0f0f0; }
-        .photo-upload-text { font-size: 12px; color: var(--expo-blue); }
+        .photo-upload-text { font-size: 12px; }
 
         .menu-footer {
             margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;
             font-size: 10px; color: #888; line-height: 1.6;
         }
 
-        input[type=range] { width: 100%; cursor: pointer; }
+        input[type=range] { 
+            width: 100%; cursor: pointer; 
+            accent-color: var(--expo-blue);
+        }
         #file-input { display: none; }
     </style>
 </head>
@@ -184,7 +212,13 @@
 
 <div id="audio-menu">
     <div class="menu-item">
-        <div class="menu-label">Background Photo</div>
+        <div class="menu-label">Background Style</div>
+        
+        <button class="reset-bg-btn" onclick="resetBackground('#FFFFFF')">
+            <div class="bg-dot"></div>
+            <span>DEFAULT (WHITE)</span>
+        </button>
+        
         <label class="photo-upload-container" for="file-input">
             <span class="photo-upload-text">PHOTO SELECT</span>
             <i data-lucide="camera" style="width: 18px; height: 18px;"></i>
@@ -226,18 +260,18 @@
     </div>
 
     <div class="menu-footer">
-        Ver 2.0.2<br>
+        Ver 2.0.4<br>
         このコンテンツは非公式の二次創作物です。
     </div>
 </div>
 
 <script>
 /**
- * こみゃくのおと 2.0.2
- * 更新内容: 横画面時のメニュー表示切れを修正（スクロール対応）
+ * こみゃくのおと 2.0.4
+ * 更新内容: 設定メニューの見出し（.menu-label）を bold に変更し視認性を向上。
  */
 const CONFIG = {
-    COLORS: { RED: '#E60012', BLUE: '#0068B7', GRAY: '#D2D7DA', WHITE: '#FFFFFF' },
+    COLORS: { RED: '#E60012', BLUE: '#0068B7', GRAY: '#D2D7DA', WHITE: '#FFFFFF', DARK_GRAY: '#222426' },
     CO_MYAKU: { 
         RADIUS: 100,
         EYE_WHITE_RATIO: 0.45,
@@ -275,8 +309,15 @@ const audioState = {
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
+const bgContainer = document.getElementById('bg-container');
 const bgImage = document.getElementById('bg-image');
 const tapGuide = document.getElementById('tap-guide');
+
+function resetBackground(color) {
+    bgImage.style.display = 'none';
+    bgContainer.style.backgroundColor = color;
+    document.getElementById('file-input').value = "";
+}
 
 class SoundEngine {
     constructor() {
