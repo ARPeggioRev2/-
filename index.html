@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>こみゃくのおと 2.0</title>
+    <title>こみゃくのおと 2.0.2</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
@@ -17,7 +17,6 @@
             margin: 0; padding: 0; overflow: hidden;
             background-color: var(--expo-white);
             user-select: none; touch-action: none;
-            /* 欧文: Helvetica Now Text Medium / 和文: 遊ゴシック体 Medium */
             font-family: "Helvetica Now Text Medium", "Helvetica Now Text", "YuGothic", "Yu Gothic", "遊ゴシック体", "遊ゴシック", sans-serif;
             font-weight: 500;
         }
@@ -52,16 +51,19 @@
             letter-spacing: 0.1em; text-transform: uppercase;
             animation: breathe-text 2s infinite ease-in-out;
             text-align: center;
-            /* 視認性向上のためのシャドウを追加 */
             text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.5);
         }
+        /* ランドスケープモード（横画面）でのテキスト位置調整 */
+        @media (orientation: landscape) and (max-height: 500px) {
+            .guide-text { margin-top: 180px; font-size: 12px; }
+        }
+
         .disclaimer-mini {
             position: fixed; bottom: 15px;
             left: 0; width: 100%; text-align: center;
             font-size: 10px; color: var(--expo-gray); letter-spacing: 0.15em;
             pointer-events: none;
             white-space: nowrap;
-            /* 下部テキストにも薄くシャドウを適用 */
             text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
         }
 
@@ -110,6 +112,10 @@
             background: rgba(255,255,255,0.95); border-radius: 16px; padding: 20px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.15); display: none;
             width: 240px; backdrop-filter: blur(5px);
+            /* 横画面対応：最大高さを設定しスクロール可能に */
+            max-height: calc(100vh - 80px);
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
         #audio-menu.show { display: block; }
         .menu-item { margin-bottom: 16px; }
@@ -220,15 +226,15 @@
     </div>
 
     <div class="menu-footer">
-        Ver 2.0.1<br>
+        Ver 2.0.2<br>
         このコンテンツは非公式の二次創作物です。
     </div>
 </div>
 
 <script>
 /**
- * こみゃくのおと 2.0.1
- * 更新内容: タップガイドの中央寄せ修正、視認性向上のためのシャドウ追加
+ * こみゃくのおと 2.0.2
+ * 更新内容: 横画面時のメニュー表示切れを修正（スクロール対応）
  */
 const CONFIG = {
     COLORS: { RED: '#E60012', BLUE: '#0068B7', GRAY: '#D2D7DA', WHITE: '#FFFFFF' },
