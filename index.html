@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>こみゃくのおと 2.0.4 - Co-MYAKU Sound Fan Art</title>
+    <title>こみゃくのおと 2.0.7 - Co-MYAKU Sound Fan Art</title>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
@@ -17,7 +17,9 @@
             margin: 0; padding: 0; overflow: hidden;
             background-color: var(--expo-white);
             color: var(--expo-dark-gray);
-            user-select: none; touch-action: none;
+            user-select: none; 
+            touch-action: none;
+            -webkit-tap-highlight-color: transparent;
             font-family: "Helvetica Now Text Medium", "Helvetica Now Text", "YuGothic", "Yu Gothic", "遊ゴシック体", "遊ゴシック", sans-serif;
             font-weight: 500;
         }
@@ -220,8 +222,8 @@
     <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
 
     <div class="menu-item">
-        <div class="menu-label">Master Volume <span id="val-master">70%</span></div>
-        <input type="range" id="vol-master" min="0" max="1" step="0.01" value="0.7">
+        <div class="menu-label">Master Volume <span id="val-master">85%</span></div>
+        <input type="range" id="vol-master" min="0" max="1" step="0.01" value="0.85">
     </div>
 
     <div class="menu-item">
@@ -251,7 +253,7 @@
     </div>
 
     <div class="menu-footer">
-        <strong>Ver 2.0.4</strong><br>
+        <strong>Ver 2.0.7</strong><br>
         このコンテンツは個人による非公式の二次創作（ファンアート）です。<br>
         参考：<a href="https://www.expo2025.or.jp/news/news-20260330-01/" target="_blank">ガイドライン</a><br>
         Presented by <strong>ARPeggioRev2</strong><br>
@@ -261,8 +263,8 @@
 
 <script>
 /**
- * こみゃくのおと 2.0.4
- * 背景ボタン表記修正 ＆ クレジット整理
+ * こみゃくのおと 2.0.7
+ * サウンドバランス調整 (Strings Down / Master Up)
  */
 const CONFIG = {
     COLORS: { RED: '#E60012', BLUE: '#0068B7', GRAY: '#D2D7DA', WHITE: '#FFFFFF', DARK_GRAY: '#222426' },
@@ -290,7 +292,7 @@ let isPressing = false;
 let bodyY = 0, bodyScaleY = 1.0, jumpVelocity = 0, jumpTimer = 0;
 
 const audioState = {
-    masterVol: 0.7,
+    masterVol: 0.85,
     pianoVol: 1.0,
     stringsVol: 1.0,
     baseVol: 1.0,
@@ -326,7 +328,8 @@ class SoundEngine {
             strings: [329.63, 369.99, 415.30, 440.00, 493.88, 554.37, 659.25], 
             base: [82.41, 123.47],
             piano1: [329.63, 415.30, 493.88, 659.25], 
-            piano2: [164.81, 207.65, 246.94, 293.66, 329.63]
+            piano2: [164.81, 207.65, 246.94, 293.66, 329.63],
+            contact: [329.63, 369.99, 415.30, 440.00, 493.88, 554.37, 622.25, 659.25]
         };
         this.analysers = { piano: null, strings: null, base: null };
     }
@@ -400,13 +403,15 @@ class SoundEngine {
         panner.pan.setValueAtTime(panX, now);
         
         const formants = type === 'high' ? 
-            [{ f: 800, q: 6, g: 1.2 }, { f: 1200, q: 10, g: 0.8 }, { f: 3000, q: 4, g: 0.4 }] : 
-            [{ f: 500, q: 8, g: 1.2 }, { f: 800, q: 10, g: 0.7 }, { f: 2500, q: 3, g: 0.3 }];
+            [{ f: 700, q: 3, g: 1.0 }, { f: 1100, q: 5, g: 0.6 }, { f: 2800, q: 2, g: 0.25 }] : 
+            [{ f: 450, q: 4, g: 1.0 }, { f: 750, q: 5, g: 0.5 }, { f: 2200, q: 2, g: 0.15 }];
             
         const osc = this.ctx.createOscillator();
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(freq, now);
-        const finalGain = gain * audioState.stringsVol * 2.5;
+        
+        // 音量を少し絞る (2.5 -> 1.8)
+        const finalGain = gain * audioState.stringsVol * 1.8;
         
         formants.forEach(fm => {
             const filter = this.ctx.createBiquadFilter();
@@ -422,8 +427,13 @@ class SoundEngine {
         env.gain.setValueAtTime(0, now);
         env.gain.linearRampToValueAtTime(finalGain, now + 1.2); 
         env.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
+
+        const masterLp = this.ctx.createBiquadFilter();
+        masterLp.type = 'lowpass';
+        masterLp.frequency.setValueAtTime(2400, now);
+
         osc.start(now); osc.stop(now + 2.5);
-        groupGain.connect(env); env.connect(panner); panner.connect(this.analysers.strings);
+        groupGain.connect(env); env.connect(masterLp); masterLp.connect(panner); panner.connect(this.analysers.strings);
     }
 
     triggerBaseSound(freq, pan = 0) {
@@ -448,6 +458,51 @@ class SoundEngine {
         pannerNode.pan.setValueAtTime(pan, now);
         filterNode.connect(gainNode); gainNode.connect(pannerNode); pannerNode.connect(this.analysers.base);
         this.spawnParticle(CONFIG.COLORS.GRAY);
+    }
+
+    triggerContactSound(freqIndex = null) {
+        if (!this.ready || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        
+        const baseFreq = freqIndex !== null 
+            ? this.scales.contact[freqIndex % this.scales.contact.length] 
+            : this.scales.contact[Math.floor(Math.random() * this.scales.contact.length)];
+        
+        const delayInterval = (CONFIG.AUDIO.BASE_TICK * 2 / 1000) * audioState.tempoScale; 
+
+        for (let i = 0; i < 3; i++) {
+            const time = now + (i * delayInterval);
+            const gainValue = 0.3 * Math.pow(0.5, i);
+            
+            const g = this.ctx.createGain();
+            g.gain.setValueAtTime(0, time);
+            g.gain.linearRampToValueAtTime(gainValue, time + 0.01);
+            g.gain.exponentialRampToValueAtTime(0.001, time + 0.4);
+            
+            const osc = this.ctx.createOscillator();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(baseFreq, time); 
+            
+            if (i === 0) {
+                const clickGain = this.ctx.createGain();
+                clickGain.gain.setValueAtTime(0.4, time);
+                clickGain.gain.exponentialRampToValueAtTime(0.001, time + 0.02);
+                
+                const clickOsc = this.ctx.createOscillator();
+                clickOsc.type = 'square';
+                clickOsc.frequency.setValueAtTime(baseFreq * 4, time);
+                
+                clickOsc.connect(clickGain);
+                clickGain.connect(this.masterGain);
+                clickOsc.start(time);
+                clickOsc.stop(time + 0.03);
+            }
+            
+            osc.connect(g); 
+            g.connect(this.masterGain);
+            osc.start(time); 
+            osc.stop(time + 0.5);
+        }
     }
 
     triggerInst(part, panX) {
@@ -548,6 +603,47 @@ class MiniCoMyaku {
     }
 }
 
+class Ripple {
+    constructor(x, y) {
+        this.x = x; this.y = y;
+        this.life = 1.0;
+        this.r = 10;
+    }
+    update() { this.life -= 0.02; this.r += 4; return this.life > 0; }
+    draw(ctx) {
+        ctx.save();
+        ctx.globalAlpha = this.life;
+        ctx.strokeStyle = CONFIG.COLORS.BLUE;
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); ctx.stroke();
+        ctx.restore();
+    }
+}
+
+class SmallParticle {
+    constructor(x, y, color) {
+        this.x = x; this.y = y; this.color = color;
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 2 + Math.random() * 4;
+        this.vx = Math.cos(angle) * speed;
+        this.vy = Math.sin(angle) * speed;
+        this.life = 1.0;
+        this.size = 3 + Math.random() * 5;
+    }
+    update() {
+        this.x += this.vx; this.y += this.vy;
+        this.vx *= 0.96; this.vy *= 0.96;
+        this.life -= 0.03; return this.life > 0;
+    }
+    draw(ctx) {
+        ctx.save();
+        ctx.globalAlpha = this.life;
+        ctx.fillStyle = this.color;
+        ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+    }
+}
+
 class MainCoMyaku {
     constructor() {
         this.r = CONFIG.CO_MYAKU.RADIUS;
@@ -627,6 +723,20 @@ document.addEventListener('click', () => {
     if (audioMenu.classList.contains('show')) audioMenu.classList.remove('show');
 });
 
+function spawnInteraction(x, y) {
+    if (!isMasterPlaying) return;
+
+    const freqIdx = Math.floor((x / width) * 8);
+    engine.triggerContactSound(freqIdx);
+
+    entities.push(new Ripple(x, y));
+
+    const colors = [CONFIG.COLORS.RED, CONFIG.COLORS.BLUE, CONFIG.COLORS.WHITE];
+    for (let i = 0; i < 10; i++) {
+        entities.push(new SmallParticle(x, y, colors[i % 3]));
+    }
+}
+
 document.getElementById('interaction-target').onclick = async (e) => {
     e.stopPropagation();
     if (isMasterPlaying) { 
@@ -687,6 +797,7 @@ document.getElementById('global-move').onpointerdown = (e) => {
     isPressing = true;
     const clamped = uiModel.clampEyePosition((e.clientX - width/2), (e.clientY - height/2));
     uiModel.targetEyeX = clamped.x; uiModel.targetEyeY = clamped.y;
+    spawnInteraction(e.clientX, e.clientY);
 };
 window.onpointermove = (e) => { 
     if (isPressing) { 
