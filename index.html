@@ -2,8 +2,10 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>こみゃくのおと 2.0.7 - Co-MYAKU Sound Fan Art</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>こみゃくのおと 2.0.8 - Co-MYAKU NOTE Fan Art</title>
+    <!-- ファビコンの設定: 4分音符Ver（赤一色・目付き）のSVGをデータURLとして指定 -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M18 5 L18 22' stroke='%23E60012' stroke-width='2.8' stroke-linecap='round' fill='none' /%3E%3Cpath d='M12 17 C6 17 4 21 4 25 C4 29 8 31 12 31 C16 31 20 28 20 24 C20 20 17 17 12 17 Z' fill='%23E60012' /%3E%3Ccircle cx='12' cy='24' r='4.2' fill='white' /%3E%3Ccircle cx='13.5' cy='23' r='2.2' fill='%230068B7' /%3E%3C/svg%3E">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
@@ -18,6 +20,8 @@
             background-color: var(--expo-white);
             color: var(--expo-dark-gray);
             user-select: none; 
+            -webkit-user-select: none;
+            -webkit-touch-callout: none; 
             touch-action: none;
             -webkit-tap-highlight-color: transparent;
             font-family: "Helvetica Now Text Medium", "Helvetica Now Text", "YuGothic", "Yu Gothic", "遊ゴシック体", "遊ゴシック", sans-serif;
@@ -80,6 +84,7 @@
             border-radius: 12px; display: flex; justify-content: center; align-items: center;
             cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color: var(--expo-blue);
             border: none; outline: none; transition: background 0.2s;
+            -webkit-touch-callout: none;
         }
         
         .gear-container {
@@ -182,7 +187,7 @@
         #file-input { display: none; }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
 <div id="bg-container"><img id="bg-image" alt="Background"></div>
 <canvas id="canvas"></canvas>
@@ -253,7 +258,7 @@
     </div>
 
     <div class="menu-footer">
-        <strong>Ver 2.0.7</strong><br>
+        <strong>Ver 2.0.8</strong><br>
         このコンテンツは個人による非公式の二次創作（ファンアート）です。<br>
         参考：<a href="https://www.expo2025.or.jp/news/news-20260330-01/" target="_blank">ガイドライン</a><br>
         Presented by <strong>ARPeggioRev2</strong><br>
@@ -263,8 +268,8 @@
 
 <script>
 /**
- * こみゃくのおと 2.0.7
- * サウンドバランス調整 (Strings Down / Master Up)
+ * こみゃくのおと 2.0.8
+ * 4分音符ファビコン適用
  */
 const CONFIG = {
     COLORS: { RED: '#E60012', BLUE: '#0068B7', GRAY: '#D2D7DA', WHITE: '#FFFFFF', DARK_GRAY: '#222426' },
@@ -308,6 +313,12 @@ const ctx = canvas.getContext('2d');
 const bgContainer = document.getElementById('bg-container');
 const bgImage = document.getElementById('bg-image');
 const tapGuide = document.getElementById('tap-guide');
+
+window.oncontextmenu = function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+    return false;
+};
 
 function resetBackground(color) {
     bgImage.style.display = 'none';
@@ -401,18 +412,13 @@ class SoundEngine {
         const groupGain = this.ctx.createGain();
         const panner = this.ctx.createStereoPanner();
         panner.pan.setValueAtTime(panX, now);
-        
         const formants = type === 'high' ? 
             [{ f: 700, q: 3, g: 1.0 }, { f: 1100, q: 5, g: 0.6 }, { f: 2800, q: 2, g: 0.25 }] : 
             [{ f: 450, q: 4, g: 1.0 }, { f: 750, q: 5, g: 0.5 }, { f: 2200, q: 2, g: 0.15 }];
-            
         const osc = this.ctx.createOscillator();
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(freq, now);
-        
-        // 音量を少し絞る (2.5 -> 1.8)
         const finalGain = gain * audioState.stringsVol * 1.8;
-        
         formants.forEach(fm => {
             const filter = this.ctx.createBiquadFilter();
             filter.type = 'bandpass';
@@ -422,16 +428,13 @@ class SoundEngine {
             fg.gain.setValueAtTime(fm.g * finalGain, now);
             osc.connect(filter); filter.connect(fg); fg.connect(groupGain);
         });
-        
         const env = this.ctx.createGain();
         env.gain.setValueAtTime(0, now);
         env.gain.linearRampToValueAtTime(finalGain, now + 1.2); 
         env.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
-
         const masterLp = this.ctx.createBiquadFilter();
         masterLp.type = 'lowpass';
         masterLp.frequency.setValueAtTime(2400, now);
-
         osc.start(now); osc.stop(now + 2.5);
         groupGain.connect(env); env.connect(masterLp); masterLp.connect(panner); panner.connect(this.analysers.strings);
     }
@@ -463,45 +466,32 @@ class SoundEngine {
     triggerContactSound(freqIndex = null) {
         if (!this.ready || !this.ctx) return;
         const now = this.ctx.currentTime;
-        
         const baseFreq = freqIndex !== null 
             ? this.scales.contact[freqIndex % this.scales.contact.length] 
             : this.scales.contact[Math.floor(Math.random() * this.scales.contact.length)];
-        
         const delayInterval = (CONFIG.AUDIO.BASE_TICK * 2 / 1000) * audioState.tempoScale; 
-
         for (let i = 0; i < 3; i++) {
             const time = now + (i * delayInterval);
             const gainValue = 0.3 * Math.pow(0.5, i);
-            
             const g = this.ctx.createGain();
             g.gain.setValueAtTime(0, time);
             g.gain.linearRampToValueAtTime(gainValue, time + 0.01);
             g.gain.exponentialRampToValueAtTime(0.001, time + 0.4);
-            
             const osc = this.ctx.createOscillator();
             osc.type = 'sine';
             osc.frequency.setValueAtTime(baseFreq, time); 
-            
             if (i === 0) {
                 const clickGain = this.ctx.createGain();
                 clickGain.gain.setValueAtTime(0.4, time);
                 clickGain.gain.exponentialRampToValueAtTime(0.001, time + 0.02);
-                
                 const clickOsc = this.ctx.createOscillator();
                 clickOsc.type = 'square';
                 clickOsc.frequency.setValueAtTime(baseFreq * 4, time);
-                
-                clickOsc.connect(clickGain);
-                clickGain.connect(this.masterGain);
-                clickOsc.start(time);
-                clickOsc.stop(time + 0.03);
+                clickOsc.connect(clickGain); clickGain.connect(this.masterGain);
+                clickOsc.start(time); clickOsc.stop(time + 0.03);
             }
-            
-            osc.connect(g); 
-            g.connect(this.masterGain);
-            osc.start(time); 
-            osc.stop(time + 0.5);
+            osc.connect(g); g.connect(this.masterGain);
+            osc.start(time); osc.stop(time + 0.5);
         }
     }
 
@@ -678,14 +668,11 @@ class MainCoMyaku {
             this.eyeX += (this.targetEyeX - this.eyeX) * 0.02; 
             this.eyeY += (this.targetEyeY - this.eyeY) * 0.02;
         }
-        
         this.pupilX += (this.eyeX * 1.25 - this.pupilX) * 0.12; 
         this.pupilY += (this.eyeY * 1.25 - this.pupilY) * 0.12;
-        
         const limit = (this.r - this.whiteEyeR - 5) * 0.7;
         const normalizedY = (this.eyeY / (limit || 1)); 
         audioState.activityLevel = Math.max(0.1, 1.0 - ((normalizedY + 1) / 2) * 0.9);
-        
         if (!isMasterPlaying) {
             if (bodyY === 0 && jumpVelocity === 0) { 
                 if (--jumpTimer <= 0) { jumpVelocity = -5.5; jumpTimer = 200; } 
@@ -712,33 +699,28 @@ const uiModel = new MainCoMyaku();
 const audioMenu = document.getElementById('audio-menu');
 const audioTrigger = document.getElementById('audio-menu-trigger');
 
-audioTrigger.onclick = (e) => { 
+audioTrigger.onpointerdown = (e) => { 
     e.stopPropagation();
     audioMenu.classList.toggle('show'); 
 };
-
-audioMenu.onclick = (e) => e.stopPropagation();
-
-document.addEventListener('click', () => {
+audioMenu.onpointerdown = (e) => e.stopPropagation();
+document.addEventListener('pointerdown', () => {
     if (audioMenu.classList.contains('show')) audioMenu.classList.remove('show');
 });
 
 function spawnInteraction(x, y) {
     if (!isMasterPlaying) return;
-
     const freqIdx = Math.floor((x / width) * 8);
     engine.triggerContactSound(freqIdx);
-
     entities.push(new Ripple(x, y));
-
     const colors = [CONFIG.COLORS.RED, CONFIG.COLORS.BLUE, CONFIG.COLORS.WHITE];
     for (let i = 0; i < 10; i++) {
         entities.push(new SmallParticle(x, y, colors[i % 3]));
     }
 }
 
-document.getElementById('interaction-target').onclick = async (e) => {
-    e.stopPropagation();
+async function togglePlayback(e) {
+    if (e) e.stopPropagation();
     if (isMasterPlaying) { 
         isMasterPlaying = false; 
         if (engine.tickTimeout) { clearTimeout(engine.tickTimeout); engine.tickTimeout = null; }
@@ -750,7 +732,11 @@ document.getElementById('interaction-target').onclick = async (e) => {
         engine.startLoop(); 
         tapGuide.style.opacity = "0";
     }
-};
+}
+
+document.getElementById('interaction-target').addEventListener('pointerdown', (e) => {
+    togglePlayback(e);
+}, { passive: false });
 
 document.getElementById('vol-master').oninput = (e) => {
     const val = parseFloat(e.target.value); 
@@ -765,8 +751,8 @@ const setTempo = (scale, e) => {
     document.getElementById('tempo-1').classList.toggle('active', scale === 1.0);
     document.getElementById('tempo-2').classList.toggle('active', scale === 2.0);
 };
-document.getElementById('tempo-1').onclick = (e) => setTempo(1.0, e);
-document.getElementById('tempo-2').onclick = (e) => setTempo(2.0, e);
+document.getElementById('tempo-1').onpointerdown = (e) => setTempo(1.0, e);
+document.getElementById('tempo-2').onpointerdown = (e) => setTempo(2.0, e);
 
 const toggleMute = (part, e) => {
     if (e) e.stopPropagation();
@@ -777,9 +763,9 @@ const toggleMute = (part, e) => {
     icon.setAttribute('data-lucide', audioState[part + 'Muted'] ? 'volume-x' : 'volume-2');
     lucide.createIcons();
 };
-document.getElementById('mute-piano').onclick = (e) => toggleMute('piano', e);
-document.getElementById('mute-strings').onclick = (e) => toggleMute('strings', e);
-document.getElementById('mute-base').onclick = (e) => toggleMute('base', e);
+document.getElementById('mute-piano').onpointerdown = (e) => toggleMute('piano', e);
+document.getElementById('mute-strings').onpointerdown = (e) => toggleMute('strings', e);
+document.getElementById('mute-base').onpointerdown = (e) => toggleMute('base', e);
 
 document.getElementById('file-input').onchange = (e) => {
     const file = e.target.files[0];
@@ -793,19 +779,24 @@ document.getElementById('file-input').onchange = (e) => {
     }
 };
 
-document.getElementById('global-move').onpointerdown = (e) => {
+const globalMove = document.getElementById('global-move');
+globalMove.addEventListener('pointerdown', (e) => {
     isPressing = true;
     const clamped = uiModel.clampEyePosition((e.clientX - width/2), (e.clientY - height/2));
     uiModel.targetEyeX = clamped.x; uiModel.targetEyeY = clamped.y;
     spawnInteraction(e.clientX, e.clientY);
-};
-window.onpointermove = (e) => { 
+}, { passive: false });
+
+window.addEventListener('pointermove', (e) => { 
     if (isPressing) { 
         const clamped = uiModel.clampEyePosition((e.clientX - width/2), (e.clientY - height/2));
         uiModel.targetEyeX = clamped.x; uiModel.targetEyeY = clamped.y; 
     } 
-};
-window.onpointerup = () => isPressing = false;
+}, { passive: false });
+
+window.addEventListener('pointerup', () => {
+    isPressing = false;
+}, { passive: false });
 
 function resize() {
     dpr = window.devicePixelRatio || 1; 
