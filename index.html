@@ -4,8 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>こみゃくのおと 2.0.8 - Co-MYAKU NOTE Fan Art</title>
-    <!-- ファビコンの設定: 4分音符Ver（赤一色・目付き）のSVGをデータURLとして指定 -->
+    
+    <!-- ファビコン (標準ブラウザ用) -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M18 5 L18 22' stroke='%23E60012' stroke-width='2.8' stroke-linecap='round' fill='none' /%3E%3Cpath d='M12 17 C6 17 4 21 4 25 C4 29 8 31 12 31 C16 31 20 28 20 24 C20 20 17 17 12 17 Z' fill='%23E60012' /%3E%3Ccircle cx='12' cy='24' r='4.2' fill='white' /%3E%3Ccircle cx='13.5' cy='23' r='2.2' fill='%230068B7' /%3E%3C/svg%3E">
+    
+    <!-- iOS用ホーム画面アイコン (Apple Touch Icon) -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='white'/%3E%3Cg transform='scale(5.6) translate(2,2)'%3E%3Cpath d='M18 5 L18 22' stroke='%23E60012' stroke-width='2.8' stroke-linecap='round' fill='none' /%3E%3Cpath d='M12 17 C6 17 4 21 4 25 C4 29 8 31 12 31 C16 31 20 28 20 24 C20 20 17 17 12 17 Z' fill='%23E60012' /%3E%3Ccircle cx='12' cy='24' r='4.2' fill='white' /%3E%3Ccircle cx='13.5' cy='23' r='2.2' fill='%230068B7' /%3E%3C/g%3E%3C/svg%3E">
+    
+    <!-- Webアプリ化設定 (iOS) -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="こみゃくのおと">
+    
+    <!-- テーマカラー (Android/Browser) -->
+    <meta name="theme-color" content="#FFFFFF">
+
+    <!-- Android用Web App Manifest (インライン記述) -->
+    <link rel="manifest" href="data:application/json,{'name':'こみゃくのおと','short_name':'こみゃくのおと','start_url':'.','display':'standalone','background_color':'%23FFFFFF','theme_color':'%23FFFFFF','icons':[{'src':'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 192 192\'%3E%3Crect width=\'192\' height=\'192\' fill=\'white\'/%3E%3Cg transform=\'scale(6) translate(2,2)\'%3E%3Cpath d=\'M18 5 L18 22\' stroke=\'%23E60012\' stroke-width=\'2.8\' stroke-linecap=\'round\' fill=\'none\' /%3E%3Cpath d=\'M12 17 C6 17 4 21 4 25 C4 29 8 31 12 31 C16 31 20 28 20 24 C20 20 17 17 12 17 Z\' fill=\'%23E60012\' /%3E%3Ccircle cx=\'12\' cy=\'24\' r=\'4.2\' fill=\'white\' /%3E%3Ccircle cx=\'13.5\' cy=\'23\' r=\'2.2\' fill=\'%230068B7\' /%3E%3C/g%3E%3C/svg%3E','sizes':'192x192','type':'image/svg+xml'}]}">
+
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         :root {
@@ -269,7 +285,6 @@
 <script>
 /**
  * こみゃくのおと 2.0.8
- * 4分音符ファビコン適用
  */
 const CONFIG = {
     COLORS: { RED: '#E60012', BLUE: '#0068B7', GRAY: '#D2D7DA', WHITE: '#FFFFFF', DARK_GRAY: '#222426' },
