@@ -6,20 +6,13 @@
     
     <title>こみゃくのおと</title>
     
-    <!-- iOS用ホーム画面アイコン: 背景色を明示し、透過をなくした180x180のSVG -->
     <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%23FFFFFF'/%3E%3Cg transform='scale(4.8) translate(8,8)'%3E%3Cpath d='M18 5 L18 22' stroke='%23E60012' stroke-width='2.8' stroke-linecap='round' fill='none' /%3E%3Cpath d='M12 17 C6 17 4 21 4 25 C4 29 8 31 12 31 C16 31 20 28 20 24 C20 20 17 17 12 17 Z' fill='%23E60012' /%3E%3Ccircle cx='12' cy='24' r='4.2' fill='white' /%3E%3Ccircle cx='13.5' cy='23' r='2.2' fill='%230068B7' /%3E%3C/g%3E%3C/svg%3E">
-    
-    <!-- ファビコン (ブラウザタブ用) -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M18 5 L18 22' stroke='%23E60012' stroke-width='2.8' stroke-linecap='round' fill='none' /%3E%3Cpath d='M12 17 C6 17 4 21 4 25 C4 29 8 31 12 31 C16 31 20 28 20 24 C20 20 17 17 12 17 Z' fill='%23E60012' /%3E%3Ccircle cx='12' cy='24' r='4.2' fill='white' /%3E%3Ccircle cx='13.5' cy='23' r='2.2' fill='%230068B7' /%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M18 5 L18 22' stroke='%23E60012' stroke-width='2.8' stroke-linecap='round' fill='none' /%3E%3Cpath d='M12 17 C6 17 4 21 4 25 C4 29 8 31 12 31 C16 31 20 28 20 24 C20 20 17 17 12 17 Z' fill='%23E60012' /%3E%3Ccircle cx='12' cy='24' r='4.2' fill='white' /%3E%3Ccircle cx='13.5' cy='23' r='2.2' fill='%230068B7' /%3E%3C/g%3E%3C/svg%3E">
 
-    <!-- Webアプリ化設定 (iOS) -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="こみゃくのおと">
-
-    <!-- Android用Web App Manifest -->
     <link rel="manifest" href='data:application/json,{"name":"こみゃくのおと","short_name":"こみゃくのおと","start_url":".","display":"standalone","background_color":"#FFFFFF","theme_color":"#FFFFFF","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 192 192\"%3E%3Crect width=\"192\" height=\"192\" fill=\"white\"/%3E%3Cg transform=\"scale(5.2) translate(8,8)\"%3E%3Cpath d=\"M18 5 L18 22\" stroke=\"%23E60012\" stroke-width=\"2.8\" stroke-linecap=\"round\" fill=\"none\" /%3E%3Cpath d=\"M12 17 C6 17 4 21 4 25 C4 29 8 31 12 31 C16 31 20 28 20 24 C20 20 17 17 12 17 Z\" fill=\"%23E60012\" /%3E%3Ccircle cx=\"12\" cy=\"24\" r=\"4.2\" fill=\"white\" /%3E%3Ccircle cx=\"13.5\" cy=\"23\" r=\"2.2\" fill=\"%230068B7\" /%3E%3C/g%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"}]}'>
-
     <meta name="theme-color" content="#FFFFFF">
 
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -30,310 +23,218 @@
             --expo-gray: #D2D7DA;
             --expo-white: #FFFFFF;
             --expo-dark-gray: #222426;
+            --font-main: "Helvetica Now Text Medium", "Helvetica Now Text", "YuGothic", "Yu Gothic", "遊ゴシック体", "遊ゴシック", sans-serif;
         }
         body, html {
             margin: 0; padding: 0; overflow: hidden;
             background-color: var(--expo-white);
             color: var(--expo-dark-gray);
-            user-select: none; 
-            -webkit-user-select: none;
-            -webkit-touch-callout: none; 
-            touch-action: none;
-            -webkit-tap-highlight-color: transparent;
-            font-family: "Helvetica Now Text Medium", "Helvetica Now Text", "YuGothic", "Yu Gothic", "遊ゴシック体", "遊ゴシック", sans-serif;
-            font-weight: 500;
+            user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; 
+            touch-action: none; -webkit-tap-highlight-color: transparent;
+            font-family: var(--font-main);
+            font-weight: 500; height: 100%;
         }
         canvas { display: block; position: absolute; top: 0; left: 0; z-index: 2; pointer-events: none; }
         
+        #opening-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 100; background-color: var(--expo-white);
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            transition: opacity 0.8s ease-in-out, visibility 0.8s;
+        }
+        .opening-blob {
+            position: absolute; border-radius: 50%; opacity: 0.15; z-index: -1; filter: blur(60px);
+        }
+        .blob-red { width: 300px; height: 300px; background: var(--expo-red); top: -50px; left: -50px; }
+        .blob-blue { width: 250px; height: 250px; background: var(--expo-blue); bottom: 10%; right: -30px; }
+        
+        .opening-content { text-align: center; }
+        .opening-sub-top { font-size: 10px; font-weight: bold; letter-spacing: 0.4em; color: var(--expo-dark-gray); margin-bottom: 12px; }
+        .opening-main-title { font-size: 32px; font-weight: 900; margin-bottom: 4px; letter-spacing: -0.02em; }
+        .text-red { color: var(--expo-red); }
+        .text-gray { color: var(--expo-gray); }
+        .text-blue { color: var(--expo-blue); }
+        .opening-sub-bottom { font-size: 14px; font-style: italic; color: var(--expo-gray); letter-spacing: 0.1em; margin-bottom: 48px; font-weight: bold; }
+        .opening-start-btn {
+            background: var(--expo-blue); color: var(--expo-white); border: none; padding: 14px 60px; border-radius: 30px;
+            font-size: 14px; font-weight: bold; letter-spacing: 0.3em; box-shadow: 0 10px 20px rgba(0, 104, 183, 0.2);
+            cursor: pointer; outline: none; font-family: var(--font-main);
+        }
+
+        #main-app { visibility: hidden; opacity: 0; transition: opacity 1s ease; }
+
         #bg-container {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;
-            background-color: var(--expo-white);
-            display: flex; justify-content: center; align-items: center;
+            background-color: var(--expo-white); display: flex; justify-content: center; align-items: center;
             transition: background-color 0.3s ease;
         }
-        #bg-image { 
-            position: absolute; width: 100%; height: 100%; object-fit: cover; 
-            display: none;
-        }
+        #bg-image { position: absolute; width: 100%; height: 100%; object-fit: cover; display: none; }
         
-        #interaction-target {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 220px; height: 220px; z-index: 10; cursor: pointer; border-radius: 50%;
-        }
         #global-move { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; }
         
-        #tap-guide {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            z-index: 8; pointer-events: none; 
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; width: 100%;
-            transition: opacity 0.5s ease;
-        }
-        .guide-text {
-            margin-top: 240px;
-            font-size: 14px; color: var(--expo-blue);
-            letter-spacing: 0.1em; text-transform: uppercase;
-            animation: breathe-text 2s infinite ease-in-out;
-            text-align: center;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.5);
-        }
-
-        .disclaimer-mini {
-            position: fixed; bottom: 15px;
-            left: 0; width: 100%; text-align: center;
-            font-size: 10px; color: var(--expo-gray); letter-spacing: 0.15em;
-            pointer-events: none;
-            white-space: nowrap;
-            text-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
-        }
-
-        @keyframes breathe-text {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 1; }
-        }
-
-        .side-ui {
-            position: absolute; top: 24px; right: 24px; z-index: 20;
-        }
+        .side-ui { position: absolute; top: 24px; right: 24px; z-index: 20; display: flex; flex-direction: column; gap: 12px; }
         .ui-btn {
             width: 50px; height: 50px; background: rgba(255,255,255,0.9);
             border-radius: 12px; display: flex; justify-content: center; align-items: center;
             cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.1); color: var(--expo-blue);
             border: none; outline: none; transition: background 0.2s;
-            -webkit-touch-callout: none;
         }
+        .ui-btn.playing { color: var(--expo-red); }
         
-        .gear-container {
-            position: relative;
-            width: 32px; height: 32px;
-            display: flex; justify-content: center; align-items: center;
-        }
-        .gear-icon {
-            width: 100%; height: 100%;
-            fill: var(--expo-blue);
-            stroke: none;
-        }
-        .gear-eye-white {
-            position: absolute;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 10px; height: 10px; background: var(--expo-white);
-            border-radius: 50%;
-            pointer-events: none;
-        }
-        .gear-pupil {
-            position: absolute;
-            top: 40%; left: 60%; transform: translate(-50%, -50%);
-            width: 5px; height: 5px; background: var(--expo-blue);
-            border-radius: 50%;
-        }
+        .gear-container { position: relative; width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; }
+        .gear-icon { width: 100%; height: 100%; fill: var(--expo-blue); stroke: none; }
+        .gear-eye-white { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 10px; height: 10px; background: var(--expo-white); border-radius: 50%; }
+        .gear-pupil { position: absolute; top: 40%; left: 60%; transform: translate(-50%, -50%); width: 5px; height: 5px; background: var(--expo-blue); border-radius: 50%; }
 
         #audio-menu {
             position: absolute; top: 24px; right: 85px; z-index: 30;
             background: rgba(255,255,255,0.98); border-radius: 16px; padding: 20px;
             box-shadow: 0 8px 30px rgba(0,0,0,0.15); display: none;
-            width: 260px; backdrop-filter: blur(10px);
-            max-height: calc(100vh - 80px);
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-            color: var(--expo-dark-gray);
+            width: 260px; backdrop-filter: blur(10px); max-height: calc(100vh - 80px);
+            overflow-y: auto; -webkit-overflow-scrolling: touch; color: var(--expo-dark-gray);
         }
         #audio-menu.show { display: block; }
         .menu-item { margin-bottom: 20px; }
+        .menu-label { font-size: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; text-transform: uppercase; letter-spacing: 0.05em; font-weight: bold; }
         
-        .menu-label { 
-            font-size: 12px; margin-bottom: 10px; display: flex; 
-            justify-content: space-between; align-items: center; 
-            text-transform: uppercase; letter-spacing: 0.05em;
-            color: var(--expo-dark-gray);
-            font-weight: bold; 
-        }
-        
-        .reset-bg-btn {
-            display: flex; align-items: center; gap: 8px;
-            width: 100%; padding: 10px 12px; margin-bottom: 10px;
-            background: white; border: 1px solid #ddd; border-radius: 8px;
-            cursor: pointer; transition: background 0.2s;
-            font-size: 11px; color: var(--expo-dark-gray);
-            font-family: inherit; font-weight: bold;
-        }
-        .bg-dot {
-            width: 16px; height: 16px; border-radius: 50%; border: 1px solid #ddd;
-            background: #FFFFFF;
-        }
+        .menu-label span { color: var(--expo-blue); }
 
+        /* 修正：WHITEテキストとテンポボタンの非アクティブ時テキストの色をexpo-blueに変更 */
+        .reset-bg-btn { display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 12px; margin-bottom: 10px; background: white; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; font-size: 11px; font-family: inherit; font-weight: bold; color: var(--expo-blue); }
+        .bg-dot { width: 16px; height: 16px; border-radius: 50%; border: 1px solid #ddd; background: #FFFFFF; }
         .part-toggles { display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; }
-        .mute-btn {
-            flex: 1; height: 44px; border-radius: 8px; border: 1px solid #ddd;
-            background: white; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s;
-            font-family: inherit;
-            color: var(--expo-dark-gray);
-        }
+        .mute-btn { flex: 1; height: 44px; border-radius: 8px; border: 1px solid #ddd; background: white; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-family: inherit; color: var(--expo-dark-gray); }
         .mute-btn i { width: 16px; height: 16px; margin-bottom: 2px; }
         .mute-btn span { font-size: 9px; font-weight: bold; }
         .mute-btn.active { background: #fff1f1; border-color: var(--expo-red); color: var(--expo-red); }
-
         .tempo-controls { display: flex; gap: 8px; margin-top: 8px; }
-        .tempo-btn {
-            flex: 1; height: 36px; border-radius: 6px; border: 1px solid #ddd;
-            background: white; font-size: 11px; cursor: pointer;
-            font-family: inherit; font-weight: bold;
-            color: var(--expo-dark-gray);
-        }
+        .tempo-btn { flex: 1; height: 36px; border-radius: 6px; border: 1px solid #ddd; background: white; font-size: 11px; cursor: pointer; font-family: inherit; font-weight: bold; color: var(--expo-blue); }
         .tempo-btn.active { background: var(--expo-blue); color: white; border-color: var(--expo-blue); }
-
-        .photo-upload-container {
-            display: flex; align-items: center; justify-content: space-between;
-            background: #f8f9fa; border-radius: 8px; padding: 10px 12px;
-            cursor: pointer; border: 1px solid #ddd; transition: background 0.2s;
-            color: var(--expo-blue); font-weight: bold;
-        }
+        .photo-upload-container { display: flex; align-items: center; justify-content: space-between; background: #f8f9fa; border-radius: 8px; padding: 10px 12px; cursor: pointer; border: 1px solid #ddd; color: var(--expo-blue); font-weight: bold; }
         .photo-upload-text { font-size: 11px; }
-
-        .menu-footer {
-            margin-top: 24px; padding-top: 16px; border-top: 1px solid #eee;
-            font-size: 9px; color: #666; line-height: 1.6;
-        }
+        .menu-footer { margin-top: 24px; padding-top: 16px; border-top: 1px solid #eee; font-size: 9px; color: #666; line-height: 1.6; }
         .menu-footer a { color: var(--expo-blue); text-decoration: none; }
-
-        input[type=range] { 
-            width: 100%; cursor: pointer; 
-            accent-color: var(--expo-blue);
-        }
+        input[type=range] { width: 100%; cursor: pointer; accent-color: var(--expo-blue); }
         #file-input { display: none; }
     </style>
 </head>
 <body oncontextmenu="return false;">
 
-<div id="bg-container"><img id="bg-image" alt="Background"></div>
-<canvas id="canvas"></canvas>
-<div id="global-move"></div>
-<div id="interaction-target"></div>
-
-<div id="tap-guide">
-    <div class="guide-text">Tap to Play</div>
-    <div class="disclaimer-mini">Co-MYAKU FAN ART</div>
-</div>
-
-<div class="side-ui">
-    <button class="ui-btn" id="audio-menu-trigger">
-        <div class="gear-container">
-            <i data-lucide="settings" class="gear-icon"></i>
-            <div class="gear-eye-white">
-                <div class="gear-pupil"></div>
-            </div>
+<div id="opening-screen">
+    <div class="opening-blob blob-red"></div>
+    <div class="opening-blob blob-blue"></div>
+    <div class="opening-content">
+        <div class="opening-sub-top">Co-MYAKU FAN ART</div>
+        <div class="opening-main-title">
+            <span class="text-red">こみゃく</span><span class="text-gray">の</span><span class="text-blue">おと</span>
         </div>
-    </button>
+        <div class="opening-sub-bottom">Co-MYAKU note</div>
+        <button class="opening-start-btn" onclick="startApp()">START</button>
+    </div>
 </div>
 
-<div id="audio-menu">
-    <div class="menu-item">
-        <div class="menu-label">Background Style</div>
-        <button class="reset-bg-btn" onclick="resetBackground('#FFFFFF')">
-            <div class="bg-dot"></div>
-            <span>WHITE</span>
+<div id="main-app">
+    <div id="bg-container"><img id="bg-image" alt="Background"></div>
+    <canvas id="canvas"></canvas>
+    <div id="global-move"></div>
+
+    <div class="side-ui">
+        <button class="ui-btn" id="playback-trigger">
+            <i data-lucide="play" id="playback-icon" style="width: 24px; height: 24px;"></i>
         </button>
-        <label class="photo-upload-container" for="file-input">
-            <span class="photo-upload-text">PHOTO SELECT</span>
-            <i data-lucide="camera" style="width: 18px; height: 18px;"></i>
-            <input type="file" id="file-input" accept="image/*">
-        </label>
+        <button class="ui-btn" id="audio-menu-trigger">
+            <div class="gear-container">
+                <i data-lucide="settings" class="gear-icon"></i>
+                <div class="gear-eye-white"><div class="gear-pupil"></div></div>
+            </div>
+        </button>
     </div>
 
-    <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
-
-    <div class="menu-item">
-        <div class="menu-label">Master Volume <span id="val-master">85%</span></div>
-        <input type="range" id="vol-master" min="0" max="1" step="0.01" value="0.85">
-    </div>
-
-    <div class="menu-item">
-        <div class="menu-label">Tempo</div>
-        <div class="tempo-controls">
-            <button class="tempo-btn active" id="tempo-1">1/1 (120)</button>
-            <button class="tempo-btn" id="tempo-2">1/2 (60)</button>
+    <div id="audio-menu">
+        <div class="menu-item">
+            <div class="menu-label">Background Style</div>
+            <button class="reset-bg-btn" onclick="resetBackground('#FFFFFF')">
+                <div class="bg-dot"></div><span>WHITE</span>
+            </button>
+            <label class="photo-upload-container" for="file-input">
+                <span class="photo-upload-text">PHOTO SELECT</span>
+                <i data-lucide="camera" style="width: 18px; height: 18px;"></i>
+                <input type="file" id="file-input" accept="image/*">
+            </label>
         </div>
-    </div>
-    
-    <div class="menu-item">
-        <div class="menu-label">Mute</div>
-        <div class="part-toggles">
-            <div class="mute-btn" id="mute-piano">
-                <i data-lucide="volume-2" id="icon-piano"></i>
-                <span>Piano</span>
-            </div>
-            <div class="mute-btn" id="mute-strings">
-                <i data-lucide="volume-2" id="icon-strings"></i>
-                <span>Strings</span>
-            </div>
-            <div class="mute-btn" id="mute-base">
-                <i data-lucide="volume-2" id="icon-base"></i>
-                <span>Bass</span>
+        <hr style="border: 0; border-top: 1px solid #eee; margin: 15px 0;">
+        <div class="menu-item">
+            <div class="menu-label">Master Volume <span id="val-master">85%</span></div>
+            <input type="range" id="vol-master" min="-60" max="0" step="1" value="-6">
+        </div>
+        <div class="menu-item">
+            <div class="menu-label">Tempo</div>
+            <div class="tempo-controls">
+                <button class="tempo-btn active" id="tempo-1">1/1 (120)</button>
+                <button class="tempo-btn" id="tempo-2">1/2 (60)</button>
             </div>
         </div>
-    </div>
-
-    <div class="menu-footer">
-        <strong>Ver 2.0.8</strong><br>
-        このコンテンツは個人による非公式の二次創作（ファンアート）です。<br>
-        参考：<a href="https://www.expo2025.or.jp/news/news-20260330-01/" target="_blank">ガイドライン</a><br>
-        Presented by <strong>ARPeggioRev2</strong><br>
-        Program assisted by Gemini
+        <div class="menu-item">
+            <div class="menu-label">Mute</div>
+            <div class="part-toggles">
+                <div class="mute-btn" id="mute-piano"><i data-lucide="volume-2" id="icon-piano"></i><span>Piano</span></div>
+                <div class="mute-btn" id="mute-strings"><i data-lucide="volume-2" id="icon-strings"></i><span>Strings</span></div>
+                <div class="mute-btn" id="mute-base"><i data-lucide="volume-2" id="icon-base"></i><span>Bass</span></div>
+            </div>
+        </div>
+        <div class="menu-footer">
+            <strong>Ver 2.1.0</strong><br>
+            このコンテンツは個人による非公式の二次創作（ファンアート）です。<br>
+            参考：<a href="https://www.expo2025.or.jp/news/news-20260330-01/" target="_blank">ガイドライン</a><br>
+            Presented by <strong>ARPeggioRev2</strong><br>
+            Program assisted by Gemini
+        </div>
     </div>
 </div>
 
 <script>
-/**
- * こみゃくのおと 2.0.8
- */
 const CONFIG = {
     COLORS: { RED: '#E60012', BLUE: '#0068B7', GRAY: '#D2D7DA', WHITE: '#FFFFFF', DARK_GRAY: '#222426' },
-    CO_MYAKU: { 
-        RADIUS: 100,
-        EYE_WHITE_RATIO: 0.45,
-        PUPIL_RATIO: 0.20
-    },
-    AUDIO: { 
-        BASE_TICK: 250, 
-        PRIMES: {
-            BASE: 7,
-            PIANO_1: 11,
-            STRINGS_1: 13,
-            STRINGS_2: 17,
-            PIANO_2: 19
-        }
-    }
+    CO_MYAKU: { RADIUS: 100, EYE_WHITE_RATIO: 0.45, PUPIL_RATIO: 0.20 },
+    BPM: 120,
+    AUDIO: { BASE_TICK: 250, PRIMES: { BASE: 7, PIANO_1: 11, STRINGS_1: 13, STRINGS_2: 17, PIANO_2: 19 } }
 };
 
 let width, height, dpr;
 let entities = [];
 let isMasterPlaying = false;
 let isPressing = false;
+let mouseX = 0, mouseY = 0;
 let bodyY = 0, bodyScaleY = 1.0, jumpVelocity = 0, jumpTimer = 0;
 
 const audioState = {
-    masterVol: 0.85,
-    pianoVol: 1.0,
-    stringsVol: 1.0,
-    baseVol: 1.0,
-    pianoMuted: false,
-    stringsMuted: false,
-    baseMuted: false,
-    activityLevel: 1.0,
-    tempoScale: 1.0 
+    masterDb: -6,
+    pianoVol: 1.0, stringsVol: 1.0, baseVol: 1.0,
+    pianoMuted: false, stringsMuted: false, baseMuted: false,
+    activityLevel: 1.0, tempoScale: 1.0 
 };
+
+function dbToGain(db) {
+    if (db <= -60) return 0;
+    return Math.pow(10, db / 20);
+}
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const bgContainer = document.getElementById('bg-container');
 const bgImage = document.getElementById('bg-image');
-const tapGuide = document.getElementById('tap-guide');
 
-window.oncontextmenu = function(event) {
-    event.preventDefault();
-    event.stopPropagation();
-    return false;
-};
+function startApp() {
+    const opening = document.getElementById('opening-screen');
+    const app = document.getElementById('main-app');
+    opening.style.opacity = '0';
+    setTimeout(() => {
+        opening.style.visibility = 'hidden';
+        app.style.visibility = 'visible';
+        app.style.opacity = '1';
+        togglePlayback();
+    }, 800);
+}
 
 function resetBackground(color) {
     bgImage.style.display = 'none';
@@ -365,9 +266,15 @@ class SoundEngine {
             const AC = window.AudioContext || window.webkitAudioContext;
             this.ctx = new AC();
             this.masterGain = this.ctx.createGain();
-            this.masterGain.gain.setValueAtTime(audioState.masterVol, this.ctx.currentTime);
+            this.updateMasterVolume(audioState.masterDb);
+            
             this.masterCompressor = this.ctx.createDynamicsCompressor();
-            this.masterCompressor.threshold.setValueAtTime(-15, this.ctx.currentTime);
+            this.masterCompressor.threshold.setValueAtTime(-18, this.ctx.currentTime);
+            this.masterCompressor.knee.setValueAtTime(10, this.ctx.currentTime);
+            this.masterCompressor.ratio.setValueAtTime(3, this.ctx.currentTime);
+            this.masterCompressor.attack.setValueAtTime(0.01, this.ctx.currentTime);
+            this.masterCompressor.release.setValueAtTime(0.25, this.ctx.currentTime);
+
             this.reverb = this.ctx.createConvolver();
             await this.initReverb();
             ['piano', 'strings', 'base'].forEach(p => {
@@ -385,19 +292,22 @@ class SoundEngine {
     }
 
     async initReverb() {
-        const len = this.ctx.sampleRate * 4.0;
+        const len = this.ctx.sampleRate * 3.5;
         const buf = this.ctx.createBuffer(2, len, this.ctx.sampleRate);
         for (let c = 0; c < 2; c++) {
             const data = buf.getChannelData(c);
             for (let i = 0; i < len; i++) {
-                data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+                data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 2.5);
             }
         }
         this.reverb.buffer = buf;
     }
 
-    updateMasterVolume(val) {
-        if (this.masterGain) this.masterGain.gain.setTargetAtTime(val, this.ctx.currentTime, 0.05);
+    updateMasterVolume(db) {
+        if (this.masterGain) {
+            const gain = dbToGain(db);
+            this.masterGain.gain.setTargetAtTime(gain, this.ctx.currentTime, 0.05);
+        }
     }
 
     triggerPiano(freq, panX, gain, isHigh = false) {
@@ -405,19 +315,19 @@ class SoundEngine {
         const now = this.ctx.currentTime;
         const panner = this.ctx.createStereoPanner();
         panner.pan.setValueAtTime(panX, now);
-        const finalGain = gain * audioState.pianoVol;
+        const finalGain = gain * audioState.pianoVol * 1.2;
         const pg = this.ctx.createGain();
         pg.gain.setValueAtTime(0, now);
         pg.gain.linearRampToValueAtTime(finalGain, now + 0.005);
-        pg.gain.exponentialRampToValueAtTime(0.001, now + (isHigh ? 1.5 : 2.5));
+        pg.gain.exponentialRampToValueAtTime(0.001, now + (isHigh ? 1.8 : 3.0));
         const osc1 = this.ctx.createOscillator();
         osc1.type = 'sine';
         osc1.frequency.setValueAtTime(freq, now);
         osc1.connect(pg);
         const lp = this.ctx.createBiquadFilter();
         lp.type = 'lowpass';
-        lp.frequency.setValueAtTime(isHigh ? 4000 : 2000, now);
-        osc1.start(now); osc1.stop(now + 2.6);
+        lp.frequency.setValueAtTime(isHigh ? 3500 : 1800, now);
+        osc1.start(now); osc1.stop(now + 3.1);
         pg.connect(lp); lp.connect(panner); panner.connect(this.analysers.piano);
     }
 
@@ -433,7 +343,7 @@ class SoundEngine {
         const osc = this.ctx.createOscillator();
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(freq, now);
-        const finalGain = gain * audioState.stringsVol * 1.8;
+        const finalGain = gain * audioState.stringsVol * 2.2;
         formants.forEach(fm => {
             const filter = this.ctx.createBiquadFilter();
             filter.type = 'bandpass';
@@ -446,11 +356,11 @@ class SoundEngine {
         const env = this.ctx.createGain();
         env.gain.setValueAtTime(0, now);
         env.gain.linearRampToValueAtTime(finalGain, now + 1.2); 
-        env.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
+        env.gain.exponentialRampToValueAtTime(0.001, now + 3.0);
         const masterLp = this.ctx.createBiquadFilter();
         masterLp.type = 'lowpass';
-        masterLp.frequency.setValueAtTime(2400, now);
-        osc.start(now); osc.stop(now + 2.5);
+        masterLp.frequency.setValueAtTime(2000, now);
+        osc.start(now); osc.stop(now + 3.1);
         groupGain.connect(env); env.connect(masterLp); masterLp.connect(panner); panner.connect(this.analysers.strings);
     }
 
@@ -461,7 +371,7 @@ class SoundEngine {
         const filterNode = this.ctx.createBiquadFilter();
         const pannerNode = this.ctx.createStereoPanner();
         filterNode.type = 'lowpass';
-        filterNode.frequency.setValueAtTime(3000, now);
+        filterNode.frequency.setValueAtTime(2000, now);
         [0, 2, -2].forEach((detuneHz, i) => {
             const osc = this.ctx.createOscillator();
             osc.type = 'sine';
@@ -469,7 +379,7 @@ class SoundEngine {
             osc.connect(filterNode);
             osc.start(now + i * 0.03); osc.stop(now + 12);
         });
-        const finalGain = 0.3 * audioState.baseVol;
+        const finalGain = 0.45 * audioState.baseVol;
         gainNode.gain.setValueAtTime(0, now);
         gainNode.gain.linearRampToValueAtTime(finalGain, now + 0.8);
         gainNode.gain.exponentialRampToValueAtTime(0.001, now + 10);
@@ -481,32 +391,42 @@ class SoundEngine {
     triggerContactSound(freqIndex = null) {
         if (!this.ready || !this.ctx) return;
         const now = this.ctx.currentTime;
-        const baseFreq = freqIndex !== null 
-            ? this.scales.contact[freqIndex % this.scales.contact.length] 
-            : this.scales.contact[Math.floor(Math.random() * this.scales.contact.length)];
-        const delayInterval = (CONFIG.AUDIO.BASE_TICK * 2 / 1000) * audioState.tempoScale; 
+        const baseFreq = freqIndex !== null ? this.scales.contact[freqIndex % this.scales.contact.length] : this.scales.contact[Math.floor(Math.random() * this.scales.contact.length)];
+        
         for (let i = 0; i < 3; i++) {
-            const time = now + (i * delayInterval);
-            const gainValue = 0.3 * Math.pow(0.5, i);
-            const g = this.ctx.createGain();
-            g.gain.setValueAtTime(0, time);
-            g.gain.linearRampToValueAtTime(gainValue, time + 0.01);
-            g.gain.exponentialRampToValueAtTime(0.001, time + 0.4);
-            const osc = this.ctx.createOscillator();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(baseFreq, time); 
+            const delay = i * 0.08;
+            const startTime = now + delay;
+            
+            const bodyOsc = this.ctx.createOscillator();
+            const bodyGain = this.ctx.createGain();
+            bodyOsc.type = 'sine';
+            bodyOsc.frequency.setValueAtTime(baseFreq, startTime);
+            
+            bodyGain.gain.setValueAtTime(0.001, startTime);
+            const peakGain = (0.3 / (i + 1)); 
+            bodyGain.gain.linearRampToValueAtTime(peakGain, startTime + 0.01);
+            bodyGain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.5);
+
+            bodyOsc.connect(bodyGain);
+            bodyGain.connect(this.masterGain);
+            bodyOsc.start(startTime);
+            bodyOsc.stop(startTime + 0.6);
+
             if (i === 0) {
-                const clickGain = this.ctx.createGain();
-                clickGain.gain.setValueAtTime(0.4, time);
-                clickGain.gain.exponentialRampToValueAtTime(0.001, time + 0.02);
                 const clickOsc = this.ctx.createOscillator();
-                clickOsc.type = 'square';
-                clickOsc.frequency.setValueAtTime(baseFreq * 4, time);
-                clickOsc.connect(clickGain); clickGain.connect(this.masterGain);
-                clickOsc.start(time); clickOsc.stop(time + 0.03);
+                const clickGain = this.ctx.createGain();
+                clickOsc.type = 'square'; 
+                clickOsc.frequency.setValueAtTime(baseFreq * 4, startTime); 
+                
+                clickGain.gain.setValueAtTime(0.001, startTime);
+                clickGain.gain.linearRampToValueAtTime(0.4, startTime + 0.01);
+                clickGain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.02);
+
+                clickOsc.connect(clickGain);
+                clickGain.connect(this.masterGain);
+                clickOsc.start(startTime);
+                clickOsc.stop(startTime + 0.03);
             }
-            osc.connect(g); g.connect(this.masterGain);
-            osc.start(time); osc.stop(time + 0.5);
         }
     }
 
@@ -529,13 +449,9 @@ class SoundEngine {
 
     spawnParticle(colorHex) {
         const angle = Math.random() * Math.PI * 2;
-        const startX = width/2;
-        const startY = height/2 + bodyY;
-        if (Math.random() < 0.25) {
-            entities.push(new MiniCoMyaku(startX, startY, colorHex, angle));
-        } else {
-            entities.push(new Bubble(startX, startY, colorHex, angle));
-        }
+        const startX = width/2; const startY = height/2 + bodyY;
+        if (Math.random() < 0.25) entities.push(new MiniCoMyaku(startX, startY, colorHex, angle));
+        else entities.push(new Bubble(startX, startY, colorHex, angle));
     }
 
     startLoop() {
@@ -557,19 +473,15 @@ class Bubble {
     constructor(x, y, color, angle) {
         this.baseX = x; this.baseY = y; this.color = color; this.angle = angle;
         this.speed = 1.5 + Math.random() * 2.5; this.dist = 0; this.life = 1.0; 
-        this.maxSize = 25 + Math.random() * 25; 
-        this.offsetPhase = Math.random() * Math.PI * 2;
-        this.offsetFreq = 0.05 + Math.random() * 0.05;
-        this.offsetAmp = 10 + Math.random() * 20;
+        this.maxSize = 25 + Math.random() * 25; this.offsetPhase = Math.random() * Math.PI * 2;
+        this.offsetFreq = 0.05 + Math.random() * 0.05; this.offsetAmp = 10 + Math.random() * 20;
     }
     update() { this.dist += this.speed; this.life -= 0.006; return this.life > 0; }
     draw(ctx) {
-        const tx = Math.cos(this.angle) * this.dist;
-        const ty = Math.sin(this.angle) * this.dist;
+        const tx = Math.cos(this.angle) * this.dist; const ty = Math.sin(this.angle) * this.dist;
         const wave = Math.sin(this.dist * this.offsetFreq + this.offsetPhase) * this.offsetAmp * (1.0 - this.life);
         const currentSize = this.maxSize * (1.0 - this.life); 
-        ctx.save(); 
-        ctx.globalAlpha = Math.min(1.0, this.life * 5.0);
+        ctx.save(); ctx.globalAlpha = Math.min(1.0, this.life * 5.0);
         ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.baseX + tx - Math.sin(this.angle)*wave, this.baseY + ty + Math.cos(this.angle)*wave, currentSize, 0, Math.PI * 2); ctx.fill(); 
         ctx.restore();
     }
@@ -578,27 +490,20 @@ class Bubble {
 class MiniCoMyaku {
     constructor(startX, startY, color, angle) {
         this.baseX = startX; this.baseY = startY; this.color = color; this.angle = angle;
-        this.speed = 1.0 + Math.random() * 1.5; this.dist = 0; this.life = 1.0; 
-        this.maxSize = 35 + Math.random() * 15; 
+        this.speed = 1.0 + Math.random() * 1.5; this.dist = 0; this.life = 1.0; this.maxSize = 35 + Math.random() * 15; 
         const ewAngle = Math.random() * Math.PI * 2;
-        this.ewXRatio = Math.cos(ewAngle) * 0.3;
-        this.ewYRatio = Math.sin(ewAngle) * 0.3;
-        this.lookX = Math.cos(Math.random() * Math.PI * 2) * 0.5;
-        this.lookY = Math.sin(Math.random() * Math.PI * 2) * 0.5;
-        this.offsetPhase = Math.random() * Math.PI * 2;
-        this.offsetFreq = 0.04 + Math.random() * 0.04;
-        this.offsetAmp = 15 + Math.random() * 15;
+        this.ewXRatio = Math.cos(ewAngle) * 0.3; this.ewYRatio = Math.sin(ewAngle) * 0.3;
+        this.lookX = Math.cos(Math.random() * Math.PI * 2) * 0.5; this.lookY = Math.sin(Math.random() * Math.PI * 2) * 0.5;
+        this.offsetPhase = Math.random() * Math.PI * 2; this.offsetFreq = 0.04 + Math.random() * 0.04; this.offsetAmp = 15 + Math.random() * 15;
     }
     update() { this.dist += this.speed; this.life -= 0.005; return this.life > 0.01; }
     draw(ctx) {
-        const tx = Math.cos(this.angle) * this.dist;
-        const ty = Math.sin(this.angle) * this.dist;
+        const tx = Math.cos(this.angle) * this.dist; const ty = Math.sin(this.angle) * this.dist;
         const wave = Math.sin(this.dist * this.offsetFreq + this.offsetPhase) * this.offsetAmp * (1.0 - this.life);
         const currentSize = this.maxSize * (1.0 - this.life); 
         const ewR = currentSize * CONFIG.CO_MYAKU.EYE_WHITE_RATIO;
         const pR = currentSize * CONFIG.CO_MYAKU.PUPIL_RATIO;
-        const ewX = this.ewXRatio * currentSize;
-        const ewY = this.ewYRatio * currentSize;
+        const ewX = this.ewXRatio * currentSize; const ewY = this.ewYRatio * currentSize;
         ctx.save(); ctx.translate(this.baseX + tx - Math.sin(this.angle)*wave, this.baseY + ty + Math.cos(this.angle)*wave);
         ctx.globalAlpha = Math.min(1.0, this.life * 5.0);
         ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(0, 0, currentSize, 0, Math.PI * 2); ctx.fill();
@@ -609,102 +514,164 @@ class MiniCoMyaku {
 }
 
 class Ripple {
-    constructor(x, y) {
-        this.x = x; this.y = y;
-        this.life = 1.0;
-        this.r = 10;
-    }
+    constructor(x, y) { this.x = x; this.y = y; this.life = 1.0; this.r = 10; }
     update() { this.life -= 0.02; this.r += 4; return this.life > 0; }
-    draw(ctx) {
-        ctx.save();
-        ctx.globalAlpha = this.life;
-        ctx.strokeStyle = CONFIG.COLORS.BLUE;
-        ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); ctx.stroke();
-        ctx.restore();
-    }
+    draw(ctx) { ctx.save(); ctx.globalAlpha = this.life; ctx.strokeStyle = CONFIG.COLORS.BLUE; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
 }
 
 class SmallParticle {
     constructor(x, y, color) {
         this.x = x; this.y = y; this.color = color;
-        const angle = Math.random() * Math.PI * 2;
-        const speed = 2 + Math.random() * 4;
-        this.vx = Math.cos(angle) * speed;
-        this.vy = Math.sin(angle) * speed;
-        this.life = 1.0;
-        this.size = 3 + Math.random() * 5;
+        const angle = Math.random() * Math.PI * 2; const speed = 2 + Math.random() * 4;
+        this.vx = Math.cos(angle) * speed; this.vy = Math.sin(angle) * speed;
+        this.life = 1.0; this.size = 3 + Math.random() * 5;
     }
-    update() {
-        this.x += this.vx; this.y += this.vy;
-        this.vx *= 0.96; this.vy *= 0.96;
-        this.life -= 0.03; return this.life > 0;
-    }
-    draw(ctx) {
-        ctx.save();
-        ctx.globalAlpha = this.life;
-        ctx.fillStyle = this.color;
-        ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
-        ctx.restore();
-    }
+    update() { this.x += this.vx; this.y += this.vy; this.vx *= 0.96; this.vy *= 0.96; this.life -= 0.03; return this.life > 0; }
+    draw(ctx) { ctx.save(); ctx.globalAlpha = this.life; ctx.fillStyle = this.color; ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
 }
 
 class MainCoMyaku {
     constructor() {
-        this.r = CONFIG.CO_MYAKU.RADIUS;
-        this.whiteEyeR = this.r * CONFIG.CO_MYAKU.EYE_WHITE_RATIO;
-        this.pupilR = this.r * CONFIG.CO_MYAKU.PUPIL_RATIO;
-        this.eyeX = 0; this.eyeY = 0; this.pupilX = 0; this.pupilY = 0;
-        this.targetEyeX = 0; this.targetEyeY = 0; this.autoTimer = 0;
+        this.bodyR = CONFIG.CO_MYAKU.RADIUS;
+        this.whiteEyeR = this.bodyR * CONFIG.CO_MYAKU.EYE_WHITE_RATIO;
+        this.pupilR = this.bodyR * CONFIG.CO_MYAKU.PUPIL_RATIO;
+        
+        this.eyeLimitRatio = (this.bodyR - this.whiteEyeR) / this.bodyR;
+        this.pupilLimitRatio = (this.whiteEyeR - this.pupilR) / this.whiteEyeR;
+
+        const eyeLimit = this.bodyR * this.eyeLimitRatio;
+        const pupilLimit = this.whiteEyeR * this.pupilLimitRatio;
+
+        const startAngleE = Math.random() * Math.PI * 2;
+        const startDistE = (0.7 + Math.random() * 0.3) * eyeLimit;
+        this.eyeX = Math.cos(startAngleE) * startDistE;
+        this.eyeY = Math.sin(startAngleE) * startDistE;
+        this.targetEyeX = this.eyeX;
+        this.targetEyeY = this.eyeY;
+
+        const startAngleP = Math.random() * Math.PI * 2;
+        const startDistP = (0.8 + Math.random() * 0.2) * pupilLimit;
+        const relPX = Math.cos(startAngleP) * startDistP;
+        const relPY = Math.sin(startAngleP) * startDistP;
+        this.pupilX = this.eyeX + relPX;
+        this.pupilY = this.eyeY + relPY;
+        this.targetPupilX = relPX;
+        this.targetPupilY = relPY;
+
+        this.lastTime = performance.now();
+        this.beatInterval = 60000 / CONFIG.BPM;
+        this.beatCount = 0;
+        this.accumulator = 0;
     }
-    
-    clampEyePosition(tx, ty) {
-        const maxDist = (this.r - this.whiteEyeR - 8); 
-        const currentDist = Math.sqrt(tx * tx + ty * ty);
-        if (currentDist > maxDist) {
-            const angle = Math.atan2(ty, tx);
-            return {
-                x: Math.cos(angle) * maxDist,
-                y: Math.sin(angle) * maxDist
-            };
+
+    onTick() {
+        const eyeLimit = this.bodyR * this.eyeLimitRatio;
+        const pupilLimit = this.whiteEyeR * this.pupilLimitRatio;
+
+        if (this.beatCount % 8 === 0 && !isPressing) {
+            const eAngle = Math.random() * Math.PI * 2;
+            const eDist = (0.7 + Math.random() * 0.3) * eyeLimit;
+            this.targetEyeX = Math.cos(eAngle) * eDist;
+            this.targetEyeY = Math.sin(eAngle) * eDist;
+
+            const pAngle = Math.random() * Math.PI * 2;
+            const pDist = (0.8 + Math.random() * 0.2) * pupilLimit;
+            this.targetPupilX = Math.cos(pAngle) * pDist;
+            this.targetPupilY = Math.sin(pAngle) * pDist;
         }
-        return { x: tx, y: ty };
     }
 
     update() {
-        if (!isPressing) {
-            if (--this.autoTimer <= 0) {
-                let angle = Math.random() * Math.PI * 2;
-                let dist = (this.r - this.whiteEyeR - 5) * 0.7;
-                this.targetEyeX = Math.cos(angle) * dist; 
-                this.targetEyeY = Math.sin(angle) * dist;
-                this.autoTimer = 150 + Math.random() * 300; 
-            }
-            this.eyeX += (this.targetEyeX - this.eyeX) * 0.02; 
-            this.eyeY += (this.targetEyeY - this.eyeY) * 0.02;
+        const now = performance.now();
+        const deltaTime = now - this.lastTime;
+        this.lastTime = now;
+
+        const eyeLimit = this.bodyR * this.eyeLimitRatio;
+        const pupilLimit = this.whiteEyeR * this.pupilLimitRatio;
+
+        this.accumulator += deltaTime;
+        const effectiveBeatInterval = this.beatInterval * audioState.tempoScale;
+        if (this.accumulator >= effectiveBeatInterval) {
+            this.beatCount++;
+            this.accumulator -= effectiveBeatInterval;
+            this.onTick();
         }
-        this.pupilX += (this.eyeX * 1.25 - this.pupilX) * 0.12; 
-        this.pupilY += (this.eyeY * 1.25 - this.pupilY) * 0.12;
-        const limit = (this.r - this.whiteEyeR - 5) * 0.7;
-        const normalizedY = (this.eyeY / (limit || 1)); 
+
+        if (isPressing) {
+            const dx = mouseX - width / 2;
+            const dy = mouseY - (height / 2 + bodyY);
+            const dist = Math.hypot(dx, dy);
+            const angle = Math.atan2(dy, dx);
+            
+            const targetEyeDist = Math.min(dist, eyeLimit);
+            this.targetEyeX = Math.cos(angle) * targetEyeDist;
+            this.targetEyeY = Math.sin(angle) * targetEyeDist;
+
+            const pdx = mouseX - (width / 2 + this.eyeX);
+            const pdy = mouseY - (height / 2 + bodyY + this.eyeY);
+            const pDist = Math.hypot(pdx, pdy);
+            const pAngle = Math.atan2(pdy, pdx);
+            
+            const targetPupilDist = Math.min(pDist, pupilLimit);
+            this.targetPupilX = Math.cos(pAngle) * targetPupilDist;
+            this.targetPupilY = Math.sin(pAngle) * targetPupilDist;
+        }
+
+        const eyeSpeed = (deltaTime / effectiveBeatInterval) * 0.4; 
+        const pupilSpeed = (deltaTime / effectiveBeatInterval) * 0.8;
+
+        this.eyeX += (this.targetEyeX - this.eyeX) * Math.min(eyeSpeed, 1.0);
+        this.eyeY += (this.targetEyeY - this.eyeY) * Math.min(eyeSpeed, 1.0);
+
+        const eyeDist = Math.hypot(this.eyeX, this.eyeY);
+        if (eyeDist > eyeLimit) {
+            this.eyeX *= (eyeLimit / eyeDist);
+            this.eyeY *= (eyeLimit / eyeDist);
+        }
+
+        let currentPupilRelX = this.pupilX - this.eyeX;
+        let currentPupilRelY = this.pupilY - this.eyeY;
+        
+        const driftFactor = isPressing ? 0 : 0.4;
+        const driftX = (this.eyeX / (eyeLimit || 1)) * pupilLimit * driftFactor;
+        const driftY = (this.eyeY / (eyeLimit || 1)) * pupilLimit * driftFactor;
+
+        currentPupilRelX += (this.targetPupilX + driftX - currentPupilRelX) * Math.min(pupilSpeed, 1.0);
+        currentPupilRelY += (this.targetPupilY + driftY - currentPupilRelY) * Math.min(pupilSpeed, 1.0);
+
+        const relDist = Math.hypot(currentPupilRelX, currentPupilRelY);
+        if (relDist > pupilLimit) {
+            currentPupilRelX *= (pupilLimit / relDist);
+            currentPupilRelY *= (pupilLimit / relDist);
+        }
+
+        this.pupilX = this.eyeX + currentPupilRelX;
+        this.pupilY = this.eyeY + currentPupilRelY;
+
+        const normalizedY = (this.eyeY / (eyeLimit || 1)); 
         audioState.activityLevel = Math.max(0.1, 1.0 - ((normalizedY + 1) / 2) * 0.9);
+
         if (!isMasterPlaying) {
-            if (bodyY === 0 && jumpVelocity === 0) { 
-                if (--jumpTimer <= 0) { jumpVelocity = -5.5; jumpTimer = 200; } 
-            }
-            if (jumpVelocity !== 0 || bodyY < 0) { 
-                bodyY += jumpVelocity; 
-                jumpVelocity += 0.35; 
-                if (bodyY > 0) { bodyY = 0; jumpVelocity = 0; bodyScaleY = 0.92; } 
-            }
+            if (bodyY === 0 && jumpVelocity === 0) { if (--jumpTimer <= 0) { jumpVelocity = -5.5; jumpTimer = 200; } }
+            if (jumpVelocity !== 0 || bodyY < 0) { bodyY += jumpVelocity; jumpVelocity += 0.35; if (bodyY > 0) { bodyY = 0; jumpVelocity = 0; bodyScaleY = 0.92; } }
             bodyScaleY += (1.0 - bodyScaleY) * 0.15;
         } else { bodyY *= 0.85; bodyScaleY = 1.0; }
     }
+
     draw(ctx) {
-        ctx.save(); ctx.translate(width/2, height/2 + bodyY); ctx.scale(1.0, bodyScaleY);
-        ctx.fillStyle = CONFIG.COLORS.RED; ctx.beginPath(); ctx.arc(0, 0, this.r, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = "white"; ctx.beginPath(); ctx.arc(this.eyeX, this.eyeY, this.whiteEyeR, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = CONFIG.COLORS.BLUE; ctx.beginPath(); ctx.arc(this.pupilX, this.pupilY, this.pupilR, 0, Math.PI * 2); ctx.fill();
+        ctx.save();
+        ctx.translate(width/2, height/2 + bodyY);
+        ctx.scale(1.0, bodyScaleY);
+        
+        ctx.fillStyle = CONFIG.COLORS.RED;
+        ctx.beginPath(); ctx.arc(0, 0, this.bodyR, 0, Math.PI * 2); ctx.fill();
+        
+        ctx.fillStyle = "white";
+        ctx.beginPath(); ctx.arc(this.eyeX, this.eyeY, this.whiteEyeR, 0, Math.PI * 2); ctx.fill();
+        
+        ctx.fillStyle = CONFIG.COLORS.BLUE;
+        ctx.beginPath(); ctx.arc(this.pupilX, this.pupilY, this.pupilR, 0, Math.PI * 2); ctx.fill();
+        
         ctx.restore();
     }
 }
@@ -713,51 +680,40 @@ const engine = new SoundEngine();
 const uiModel = new MainCoMyaku();
 const audioMenu = document.getElementById('audio-menu');
 const audioTrigger = document.getElementById('audio-menu-trigger');
+const playbackTrigger = document.getElementById('playback-trigger');
 
-audioTrigger.onpointerdown = (e) => { 
-    e.stopPropagation();
-    audioMenu.classList.toggle('show'); 
-};
+audioTrigger.onpointerdown = (e) => { e.stopPropagation(); audioMenu.classList.toggle('show'); };
 audioMenu.onpointerdown = (e) => e.stopPropagation();
-document.addEventListener('pointerdown', () => {
-    if (audioMenu.classList.contains('show')) audioMenu.classList.remove('show');
-});
-
-function spawnInteraction(x, y) {
-    if (!isMasterPlaying) return;
-    const freqIdx = Math.floor((x / width) * 8);
-    engine.triggerContactSound(freqIdx);
-    entities.push(new Ripple(x, y));
-    const colors = [CONFIG.COLORS.RED, CONFIG.COLORS.BLUE, CONFIG.COLORS.WHITE];
-    for (let i = 0; i < 10; i++) {
-        entities.push(new SmallParticle(x, y, colors[i % 3]));
-    }
-}
+document.addEventListener('pointerdown', () => { if (audioMenu.classList.contains('show')) audioMenu.classList.remove('show'); });
 
 async function togglePlayback(e) {
     if (e) e.stopPropagation();
+    const btn = document.getElementById('playback-trigger');
+    const icon = document.getElementById('playback-icon');
+
     if (isMasterPlaying) { 
         isMasterPlaying = false; 
         if (engine.tickTimeout) { clearTimeout(engine.tickTimeout); engine.tickTimeout = null; }
-        tapGuide.style.opacity = "1";
-    }
-    else { 
+        btn.classList.remove('playing');
+        icon.setAttribute('data-lucide', 'play');
+    } else { 
         await engine.init(); 
         isMasterPlaying = true; 
         engine.startLoop(); 
-        tapGuide.style.opacity = "0";
+        btn.classList.add('playing');
+        icon.setAttribute('data-lucide', 'square');
     }
+    lucide.createIcons();
 }
 
-document.getElementById('interaction-target').addEventListener('pointerdown', (e) => {
-    togglePlayback(e);
-}, { passive: false });
+playbackTrigger.addEventListener('click', togglePlayback);
 
 document.getElementById('vol-master').oninput = (e) => {
-    const val = parseFloat(e.target.value); 
-    audioState.masterVol = val;
-    document.getElementById('val-master').innerText = Math.round(val * 100) + '%'; 
-    engine.updateMasterVolume(val);
+    const db = parseInt(e.target.value); 
+    audioState.masterDb = db;
+    const displayVal = Math.round(((db + 60) / 60) * 100);
+    document.getElementById('val-master').innerText = displayVal + '%'; 
+    engine.updateMasterVolume(db);
 };
 
 const setTempo = (scale, e) => {
@@ -772,10 +728,8 @@ document.getElementById('tempo-2').onpointerdown = (e) => setTempo(2.0, e);
 const toggleMute = (part, e) => {
     if (e) e.stopPropagation();
     audioState[part + 'Muted'] = !audioState[part + 'Muted'];
-    const btn = document.getElementById('mute-' + part);
-    const icon = document.getElementById('icon-' + part);
-    btn.classList.toggle('active', audioState[part + 'Muted']);
-    icon.setAttribute('data-lucide', audioState[part + 'Muted'] ? 'volume-x' : 'volume-2');
+    document.getElementById('mute-' + part).classList.toggle('active', audioState[part + 'Muted']);
+    document.getElementById('icon-' + part).setAttribute('data-lucide', audioState[part + 'Muted'] ? 'volume-x' : 'volume-2');
     lucide.createIcons();
 };
 document.getElementById('mute-piano').onpointerdown = (e) => toggleMute('piano', e);
@@ -786,10 +740,7 @@ document.getElementById('file-input').onchange = (e) => {
     const file = e.target.files[0];
     if (file) {
         const reader = new FileReader();
-        reader.onload = (ev) => { 
-            bgImage.src = ev.target.result; 
-            bgImage.style.display = 'block'; 
-        };
+        reader.onload = (ev) => { bgImage.src = ev.target.result; bgImage.style.display = 'block'; };
         reader.readAsDataURL(file);
     }
 };
@@ -797,21 +748,21 @@ document.getElementById('file-input').onchange = (e) => {
 const globalMove = document.getElementById('global-move');
 globalMove.addEventListener('pointerdown', (e) => {
     isPressing = true;
-    const clamped = uiModel.clampEyePosition((e.clientX - width/2), (e.clientY - height/2));
-    uiModel.targetEyeX = clamped.x; uiModel.targetEyeY = clamped.y;
-    spawnInteraction(e.clientX, e.clientY);
+    mouseX = e.clientX; mouseY = e.clientY;
+    if (isMasterPlaying) {
+        const freqIdx = Math.floor((e.clientX / width) * 8);
+        engine.triggerContactSound(freqIdx);
+        entities.push(new Ripple(e.clientX, e.clientY));
+        const colors = [CONFIG.COLORS.RED, CONFIG.COLORS.BLUE, CONFIG.COLORS.WHITE];
+        for (let i = 0; i < 10; i++) entities.push(new SmallParticle(e.clientX, e.clientY, colors[i % 3]));
+    }
 }, { passive: false });
 
 window.addEventListener('pointermove', (e) => { 
-    if (isPressing) { 
-        const clamped = uiModel.clampEyePosition((e.clientX - width/2), (e.clientY - height/2));
-        uiModel.targetEyeX = clamped.x; uiModel.targetEyeY = clamped.y; 
-    } 
+    mouseX = e.clientX; mouseY = e.clientY;
 }, { passive: false });
 
-window.addEventListener('pointerup', () => {
-    isPressing = false;
-}, { passive: false });
+window.addEventListener('pointerup', () => { isPressing = false; }, { passive: false });
 
 function resize() {
     dpr = window.devicePixelRatio || 1; 
