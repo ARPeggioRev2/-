@@ -6,18 +6,18 @@
     
     <title>こみゃくのおと</title>
     
-    <!-- Favicon & Apple Touch Icon (iOS Home Screen Icon) -->
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%23FFFFFF'/%3E%3Cg transform='scale(4.8) translate(8,8)'%3E%3Cpath d='M18 5 L18 22' stroke='%23E60012' stroke-width='2.8' stroke-linecap='round' fill='none' /%3E%3Cpath d='M12 17 C6 17 4 21 4 25 C4 29 8 31 12 31 C16 31 20 28 20 24 C20 20 17 17 12 17 Z' fill='%23E60012' /%3E%3Ccircle cx='12' cy='24' r='4.2' fill='white' /%3E%3Ccircle cx='13.5' cy='23' r='2.2' fill='%230068B7' /%3E%3C/g%3E%3C/svg%3E">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M18 5 L18 22' stroke='%23E60012' stroke-width='2.8' stroke-linecap='round' fill='none' /%3E%3Cpath d='M12 17 C6 17 4 21 4 25 C4 29 8 31 12 31 C16 31 20 28 20 24 C20 20 17 17 12 17 Z' fill='%23E60012' /%3E%3Ccircle cx='12' cy='24' r='4.2' fill='white' /%3E%3Ccircle cx='13.5' cy='23' r='2.2' fill='%230068B7' /%3E%3C/g%3E%3C/svg%3E">
-
     <!-- PWA Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="こみゃくのおと">
     <meta name="theme-color" content="#FFFFFF">
 
-    <!-- Web App Manifest -->
-    <link rel="manifest" href='data:application/json,{"name":"こみゃくのおと","short_name":"こみゃくのおと","start_url":".","display":"standalone","background_color":"#FFFFFF","theme_color":"#FFFFFF","icons":[{"src":"data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20192%20192%22%3E%3Crect%20width%3D%22192%22%20height%3D%22192%22%20fill%3D%22white%22%2F%3E%3Cg%20transform%3D%22scale(5.2)%20translate(8%2C8)%22%3E%3Cpath%20d%3D%22M18%205%20L18%2022%22%20stroke%3D%22%23E60012%22%20stroke-width%3D%222.8%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%20%2F%3E%3Cpath%20d%3D%22M12%2017%20C6%2017%204%2021%204%2025%20C4%2029%208%2031%2012%2031%20C16%2031%2020%2028%2020%2024%20C20%2020%2017%2017%2012%2017%20Z%22%20fill%3D%22%23E60012%22%20%2F%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2224%22%20r%3D%224.2%22%20fill%3D%22white%22%20%2F%3E%3Ccircle%20cx%3D%2213.5%22%20cy%3D%2223%22%20r%3D%222.2%22%20fill%3D%22%230068B7%22%20%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E","sizes":"192x192","type":"image/svg+xml","purpose":"any"}]}' id="pwa-manifest">
+    <!-- 動的に設定されるリンク -->
+    <link id="apple-touch-icon" rel="apple-touch-icon">
+    <link id="pwa-manifest" rel="manifest">
+
+    <!-- favicon (SVG はブラウザアドレスバー用として維持) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23FFFFFF'/%3E%3Cpath d='M18 5 L18 22' stroke='%23E60012' stroke-width='2.8' stroke-linecap='round' fill='none'/%3E%3Cpath d='M12 17 C6 17 4 21 4 25 C4 29 8 31 12 31 C16 31 20 28 20 24 C20 20 17 17 12 17 Z' fill='%23E60012'/%3E%3Ccircle cx='12' cy='24' r='4.2' fill='white'/%3E%3Ccircle cx='13.5' cy='23' r='2.2' fill='%230068B7'/%3E%3C/svg%3E">
 
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -186,7 +186,7 @@
             </div>
         </div>
         <div class="menu-footer">
-            <strong>Ver 2.1.2</strong><br>
+            <strong>Ver 2.1.0</strong><br>
             このコンテンツは個人による非公式の二次創作（ファンアート）です。<br>
             参考：<a href="https://www.expo2025.or.jp/news/news-20260330-01/" target="_blank">ガイドライン</a><br>
             Presented by <strong>ARPeggioRev2</strong><br>
@@ -196,6 +196,98 @@
 </div>
 
 <script>
+// =========================================================
+// PWA 初期化処理 (Canvas で PNG アイコンを生成し Manifest を適用)
+// =========================================================
+(function initPWA() {
+    function drawIcon(size) {
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+        const s = size / 32;
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, size, size);
+
+        ctx.save();
+        ctx.strokeStyle = '#E60012';
+        ctx.lineWidth = 2.8 * s;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(18 * s, 5 * s);
+        ctx.lineTo(18 * s, 22 * s);
+        ctx.stroke();
+        ctx.restore();
+
+        ctx.fillStyle = '#E60012';
+        ctx.beginPath();
+        ctx.moveTo(12 * s, 17 * s);
+        ctx.bezierCurveTo(6 * s, 17 * s, 4 * s, 21 * s, 4 * s, 25 * s);
+        ctx.bezierCurveTo(4 * s, 29 * s, 8 * s, 31 * s, 12 * s, 31 * s);
+        ctx.bezierCurveTo(16 * s, 31 * s, 20 * s, 28 * s, 20 * s, 24 * s);
+        ctx.bezierCurveTo(20 * s, 20 * s, 17 * s, 17 * s, 12 * s, 17 * s);
+        ctx.closePath();
+        ctx.fill();
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(12 * s, 24 * s, 4.2 * s, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#0068B7';
+        ctx.beginPath();
+        ctx.arc(13.5 * s, 23 * s, 2.2 * s, 0, Math.PI * 2);
+        ctx.fill();
+
+        return canvas;
+    }
+
+    const icon192 = drawIcon(192).toDataURL('image/png');
+    const icon512 = drawIcon(512).toDataURL('image/png');
+    const icon180 = drawIcon(180).toDataURL('image/png');
+
+    // apple-touch-icon 設定
+    const appleIconEl = document.getElementById('apple-touch-icon');
+    if (appleIconEl) appleIconEl.href = icon180;
+
+    // Manifest 設定
+    const manifest = {
+        name: 'こみゃくのおと',
+        short_name: 'こみゃくのおと',
+        start_url: './',
+        display: 'standalone',
+        background_color: '#FFFFFF',
+        theme_color: '#FFFFFF',
+        icons: [
+            { src: icon192, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+            { src: icon512, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+        ]
+    };
+
+    const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+    const manifestURL = URL.createObjectURL(manifestBlob);
+    const manifestEl = document.getElementById('pwa-manifest');
+    if (manifestEl) manifestEl.href = manifestURL;
+
+    // Service Worker 登録
+    if ('serviceWorker' in navigator) {
+        const swCode = `
+            const CACHE = 'komyaku-v2.1.0';
+            self.addEventListener('install', e => { self.skipWaiting(); });
+            self.addEventListener('activate', e => { self.clients.claim(); });
+            self.addEventListener('fetch', e => {
+                e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+            });
+        `;
+        const swBlob = new Blob([swCode], { type: 'application/javascript' });
+        const swURL = URL.createObjectURL(swBlob);
+        navigator.serviceWorker.register(swURL, { scope: './' })
+            .then(reg => console.log('[PWA] SW Registered'))
+            .catch(err => console.warn('[PWA] SW Failed', err));
+    }
+})();
+
 // --- CONFIG & CONSTANTS ---
 const CONFIG = {
     COLORS: { RED: '#E60012', BLUE: '#0068B7', GRAY: '#D2D7DA', WHITE: '#FFFFFF', DARK_GRAY: '#222426' },
@@ -227,24 +319,6 @@ const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const bgContainer = document.getElementById('bg-container');
 const bgImage = document.getElementById('bg-image');
-
-// PWA Service Worker Registration
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        const swCode = `
-            const CACHE_NAME = 'komyaku-oto-cache-v2.1';
-            self.addEventListener('install', (e) => {
-                e.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(['./'])));
-            });
-            self.addEventListener('fetch', (e) => {
-                e.respondWith(caches.match(e.request).then(res => res || fetch(e.request)));
-            });
-        `;
-        const blob = new Blob([swCode], { type: 'text/javascript' });
-        const swUrl = URL.createObjectURL(blob);
-        navigator.serviceWorker.register(swUrl).catch(err => console.log('SW failed', err));
-    });
-}
 
 function startApp() {
     const opening = document.getElementById('opening-screen');
@@ -492,7 +566,7 @@ class SoundEngine {
     }
 }
 
-// --- ENTITIES (PARTICLES & CO-MYAKU) ---
+// --- ENTITIES ---
 class Bubble {
     constructor(x, y, color, angle) {
         this.baseX = x; this.baseY = y; this.color = color; this.angle = angle;
